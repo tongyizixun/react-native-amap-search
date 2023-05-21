@@ -2,7 +2,7 @@
  * @Author: 刘利军
  * @Date: 2023-05-20 20:53:05
  * @LastEditors: 刘利军
- * @LastEditTime: 2023-05-21 15:21:10
+ * @LastEditTime: 2023-05-21 16:10:50
  * @Description:
  * @PageName:
  */
@@ -25,11 +25,8 @@ const ReactNativeAmapSearch = NativeModules.ReactNativeAmapSearch
       }
     );
 
-export function initSDK(params: {
-  ios: string;
-  android: string;
-}): Promise<void> {
-  return ReactNativeAmapSearch.initSDK(Platform.select(params));
+export function initSDK(params: { ios: string; android: string }) {
+  ReactNativeAmapSearch.initSDK(Platform.select(params));
 }
 
 export type AMapReGeocodeSearchOutput = 'JSON';
