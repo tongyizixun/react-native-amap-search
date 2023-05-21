@@ -2,22 +2,24 @@
  * @Author: 刘利军
  * @Date: 2023-05-20 17:53:20
  * @LastEditors: 刘利军
- * @LastEditTime: 2023-05-20 21:10:52
+ * @LastEditTime: 2023-05-21 15:32:22
  * @Description:
  * @PageName:
  */
 import * as React from 'react';
 
-import { StyleSheet, View, Text, Button } from 'react-native';
+import { StyleSheet, View, Button } from 'react-native';
 import { initSDK, AMapReGeocodeSearch } from '@unif/react-native-amap-search';
 
+const AMAP_KEY_ANDROID = '9f57d2a0f1cb421d24448d29cd8fd866';
+const AMAP_KEY_IOS = '2055ceed54427f8677b8e1a8c2ccb01b';
 export default function App() {
   return (
     <View style={styles.container}>
       <Button
-        title="as"
+        title="按钮"
         onPress={async () => {
-          await initSDK();
+          await initSDK({ android: AMAP_KEY_ANDROID, ios: AMAP_KEY_IOS });
 
           const locations = {
             latitude: 31.23048312717014,
@@ -36,12 +38,10 @@ export default function App() {
             });
             console.log('AMapReGeocodeSearch regeocode', res);
           } catch (error) {
-            console.log(error);
+            console.log('error', error);
           }
         }}
-      >
-        <Text>按钮</Text>
-      </Button>
+      />
     </View>
   );
 }

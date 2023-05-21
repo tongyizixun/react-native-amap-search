@@ -3,6 +3,8 @@
 #import <React/RCTLog.h>
 #import <React/RCTConvert.h>
 
+#import <AMapFoundationKit/AMapFoundationKit.h>
+
 #import "Utils.h"
 
 
@@ -17,14 +19,16 @@ RCT_EXPORT_MODULE()
 // Example method
 // See // https://reactnative.dev/docs/native-modules-ios
 
-RCT_EXPORT_METHOD(initSDK)
+RCT_EXPORT_METHOD(initSDK:(NSString *)apikey)
 {
+  [AMapServices sharedServices].apiKey = apikey;
   [AMapSearchAPI updatePrivacyShow:AMapPrivacyShowStatusDidShow privacyInfo:AMapPrivacyInfoStatusDidContain];
   [AMapSearchAPI updatePrivacyAgree:AMapPrivacyAgreeStatusDidAgree];
   self->search = [[AMapSearchAPI alloc] init];
   self->search.delegate = self;
 };
 
+//poi搜索
 RCT_EXPORT_METHOD(aMapPOIKeywordsSearch:(NSString *)keywords
                   city:(NSString *)city
                   types:(NSString *)types
@@ -39,11 +43,11 @@ RCT_EXPORT_METHOD(aMapPOIKeywordsSearch:(NSString *)keywords
   request.keywords            = keywords;
   request.city                = city;
   request.types               = types;
-  request.requireExtension    = YES;
+//  request.requireExtension    = YES;
       
   /*  搜索SDK 3.2.0 中新增加的功能，只搜索本城市的POI。*/
   request.cityLimit           = YES;
-  request.requireSubPOIs      = YES;
+//  request.requireSubPOIs      = YES;
 
   self->jsResolve = resolve;
   self->jsReject = reject;
@@ -137,12 +141,12 @@ RCT_EXPORT_METHOD(AMapReGeocodeSearch:(NSDictionary *)coordinate
             @"distance": @(response.regeocode.addressComponent.streetNumber.distance),
             @"direction": response.regeocode.addressComponent.streetNumber.direction,
           },
-          @"businessAreas":  [[AMapUtils alloc] businessFormatData:response.regeocode.addressComponent.businessAreas]
+          @"businessAreas":  [[Utils alloc] businessFormatData:response.regeocode.addressComponent.businessAreas]
         },
-        @"roads": [[AMapUtils alloc] roadsFormatData:response.regeocode.roads],
-        @"roadinters":  [[AMapUtils alloc] roadsInterFormatData:response.regeocode.roadinters],
-        @"pois": [[AMapUtils alloc] poiFormatData:response.regeocode.pois],
-        @"aois": [[AMapUtils alloc] aoiFormatData:response.regeocode.aois],
+        @"roads": [[Utils alloc] roadsFormatData:response.regeocode.roads],
+        @"roadinters":  [[Utils alloc] roadsInterFormatData:response.regeocode.roadinters],
+        @"pois": [[Utils alloc] poiFormatData:response.regeocode.pois],
+        @"aois": [[Utils alloc] aoiFormatData:response.regeocode.aois],
     };
 
   self->jsResolve(@{ @"regeocode": data });
