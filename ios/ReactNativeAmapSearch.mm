@@ -19,25 +19,46 @@ RCT_EXPORT_MODULE()
 // Example method
 // See // https://reactnative.dev/docs/native-modules-ios
 
-RCT_EXPORT_METHOD(initSDK:(NSString *)apikey)
+RCT_EXPORT_METHOD(initSDK)
 {
-  [AMapServices sharedServices].apiKey = apikey;
   [AMapSearchAPI updatePrivacyShow:AMapPrivacyShowStatusDidShow privacyInfo:AMapPrivacyInfoStatusDidContain];
   [AMapSearchAPI updatePrivacyAgree:AMapPrivacyAgreeStatusDidAgree];
   self->search = [[AMapSearchAPI alloc] init];
   self->search.delegate = self;
 };
 
-//poi搜索
-RCT_EXPORT_METHOD(aMapPOIKeywordsSearch:(NSString *)keywords
-                  city:(NSString *)city
-                  types:(NSString *)types
+// 获取行政区划数据
+RCT_EXPORT_METHOD(aMapDistrictSearch:(NSString *)keywords
+                  currentPage:(NSInteger)currentPage
+                  pageSize:(NSInteger)pageSize
+                  subdistrict:(NSInteger)subdistrict
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
+  AMapDistrictSearchRequest *request = [[AMapDistrictSearchRequest alloc] init];
 
-  RCTLogInfo(@"RNLog aMapPOIKeywordsSearch -------- start");
+  request.keywords            = keywords;
+  request.requireExtension    = YES;
+  request.page                = currentPage;
+  request.offset              = pageSize;
+  request.subdistrict         = subdistrict;
+  self->jsResolve = resolve;
+  self->jsReject = reject;
+  [self->search AMapDistrictSearch:request];
+};
 
+
+
+// 根据关键字检索POI
+RCT_EXPORT_METHOD(aMapPOIKeywordsSearch:(NSString *)keywords
+                  types:(NSString *)types
+                  city:(NSString *)city
+                  currentPage:(NSInteger)currentPage
+                  pageSize:(NSInteger)pageSize
+                  cityLimit:(BOOL *)cityLimit
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
   AMapPOIKeywordsSearchRequest *request = [[AMapPOIKeywordsSearchRequest alloc] init];
       
   request.keywords            = keywords;
@@ -45,26 +66,148 @@ RCT_EXPORT_METHOD(aMapPOIKeywordsSearch:(NSString *)keywords
   request.types               = types;
 //  request.requireExtension    = YES;
       
-  /*  搜索SDK 3.2.0 中新增加的功能，只搜索本城市的POI。*/
+  //    搜索SDK 3.2.0 中新增加的功能，只搜索本城市的POI。
   request.cityLimit           = YES;
 //  request.requireSubPOIs      = YES;
+
+  //   设置分页页数
+  request.page = currentPage;
+  //   设置分页
+  request.offset = pageSize;
 
   self->jsResolve = resolve;
   self->jsReject = reject;
   [self->search AMapPOIKeywordsSearch:request];
 };
 
-// 地址编码
-RCT_EXPORT_METHOD(AMapGeocodeSearch:(NSString *)address
+// 检索周边POI
+RCT_EXPORT_METHOD(aMapPOIAroundSearch:(NSString *)keywords
+                  types:(NSString *)types
+                  city:(NSString *)city
+                  latitude:(nonnull NSNumber *)latitude
+                  longitude:(nonnull NSNumber *)longitude
+                  currentPage:(NSInteger)currentPage
+                  pageSize:(NSInteger)pageSize
+                  radius:(NSInteger)radius
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
+  AMapPOIAroundSearchRequest *request = [[AMapPOIAroundSearchRequest alloc] init];
+      
+  request.keywords            = keywords;
+  request.city                = city;
+  request.radius              = radius;
+  request.types               = types;
+//  request.requireExtension    = YES;
+  request.location            = [AMapGeoPoint locationWithLatitude:[latitude doubleValue] longitude:[longitude doubleValue]];
+      
+  /* 按照距离排序. */
+  request.sortrule            = 0;
+  /* 设置分页页数 */
+  request.page = currentPage;
+  /* 设置分页 */
+  request.offset = pageSize;
 
+  self->jsResolve = resolve;
+  self->jsReject = reject;
+  
+  [self->search AMapPOIAroundSearch:request];
+};
+
+// 检索多边形POI
+RCT_EXPORT_METHOD(aMapPOIPolygonSearch:(NSString *)keywords
+                  types:(NSString *)types
+                  city:(NSString *)city
+                  points:(NSArray *)points
+                  currentPage:(NSInteger)currentPage
+                  pageSize:(NSInteger)pageSize
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+  NSMutableArray<AMapGeoPoint *> *polygonPoints= [[NSMutableArray alloc] init];
+   if(points != nil && [points count] >= 2) {
+       for (NSInteger i = 0; i < [points count]; i++) {
+           NSDictionary* dict = [points objectAtIndex:i];
+           CGFloat latitude = [[dict objectForKey:@"latitude"] floatValue];
+           CGFloat longitude = [[dict objectForKey:@"longitude"] floatValue];
+           [polygonPoints addObject:[AMapGeoPoint locationWithLatitude:latitude longitude:longitude]];
+       }
+   }
+  
+  AMapGeoPolygon *polygon = [AMapGeoPolygon polygonWithPoints:polygonPoints];
+  AMapPOIPolygonSearchRequest *request = [[AMapPOIPolygonSearchRequest alloc] init];
+      
+  request.keywords            = keywords;
+  request.polygon             = polygon;
+  request.types               = types;
+//  request.requireExtension    = YES;
+  
+  /* 按照距离排序. */
+  request.sortrule            = 0;
+  /* 设置分页页数 */
+  request.page = currentPage;
+  /* 设置分页 */
+  request.offset = pageSize;
+
+  self->jsResolve = resolve;
+  self->jsReject = reject;
+  
+  [self->search AMapPOIPolygonSearch:request];
+};
+
+// 根据ID检索
+RCT_EXPORT_METHOD(aMapPOIIDSearch:(NSString *)uid
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+ 
+
+  AMapPOIIDSearchRequest *request = [[AMapPOIIDSearchRequest alloc] init];
+      
+  request.uid            = uid;
+//  request.requireExtension    = YES;
+  self->jsResolve = resolve;
+  self->jsReject = reject;
+  [self->search AMapPOIIDSearch:request];
+};
+
+// 输入内容自动提示
+RCT_EXPORT_METHOD(aMapPOIInputTipsSearch:(NSString *)keywords
+                  city:(NSString *)city
+                  type:(NSString *)type
+                  latitude:(NSNumber *)latitude
+                  longitude:(NSNumber *)longitude
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+  AMapInputTipsSearchRequest *request = [[AMapInputTipsSearchRequest alloc] init];
+      
+  request.keywords              = keywords;
+  request.city                  = city;
+  request.types                 = type;
+ 
+  if(latitude !=0 &&longitude != 0){
+//    request.location              =[NSString initwi]
+  }
+  request.cityLimit             = YES;
+  self->jsResolve = resolve;
+  self->jsReject = reject;
+  [self->search AMapInputTipsSearch:request];
+};
+
+// 地址编码
+RCT_EXPORT_METHOD(AMapGeocodeSearch:(NSString *)address
+                  city:(NSString*)city
+                  country:(NSString*)country
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
   RCTLogInfo(@"RNLog AMapGeocodeSearch -------- start");
 
   AMapGeocodeSearchRequest *request = [[AMapGeocodeSearchRequest alloc] init];
   request.address = address;
-      
+  request.city = city;
+//  request.country = country;
 
   self->jsResolve = resolve;
   self->jsReject = reject;
@@ -72,34 +215,41 @@ RCT_EXPORT_METHOD(AMapGeocodeSearch:(NSString *)address
 };
 
 // 逆地址编码
-RCT_EXPORT_METHOD(AMapReGeocodeSearch:(NSDictionary *)coordinate
+RCT_EXPORT_METHOD(AMapReGeocodeSearch:(nonnull NSNumber *)latitude
+                  longitude:(nonnull NSNumber *)longitude
+                  radius:(NSInteger)radius
+                  type:(NSString*)type
+                  extensions:(NSString *)extensions
+                  poiType:(NSString *)poiType
+                  mode:(NSString *)mode
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
 
   RCTLogInfo(@"RNLog AMapReGeocodeSearch -------- start");
   AMapReGeocodeSearchRequest *regeo = [[AMapReGeocodeSearchRequest alloc] init];
-
-  CGFloat latitude = [RCTConvert CGFloat:coordinate[@"latitude"]];
-  CGFloat longitude = [RCTConvert CGFloat:coordinate[@"longitude"]];
-  regeo.location                    = [AMapGeoPoint locationWithLatitude:latitude  longitude:longitude];
-  regeo.requireExtension            = YES;
-        
+  regeo.poitype = poiType;
+  regeo.mode = mode;
+  regeo.radius = radius;
+  regeo.location                    = [AMapGeoPoint locationWithLatitude:[latitude doubleValue]  longitude:[longitude doubleValue]];
+  regeo.requireExtension            = [extensions isEqualToString: @"all" ] ? YES:NO;
+    
 
   self->jsResolve = resolve;
   self->jsReject = reject;
   [self->search AMapReGoecodeSearch:regeo];
 };
 
+// poi搜索回调
 - (void)onPOISearchDone:(AMapPOISearchBaseRequest *)request response:(AMapPOISearchResponse *)response
 {
-  RCTLogInfo(@"RNLog onPOISearchDone");
-//  NSMutableArray *resultList = [self->aMapUtil poiSearchResponseFormatData:response];
-//    if(!self->jsResolve){
-//        return;
-//    }
-//    self->jsResolve(resultList);
-//    self->jsResolve= nil;
+    RCTLogInfo(@"RNLog onPOISearchDone %d", (int)response.count);
+    if(!self->jsResolve){
+        return;
+    }
+    NSArray *resultList = [[Utils alloc] poiSearchResponseFormatData:response];
+    self->jsResolve(@{ @"count": @(response.count), @"list": resultList});
+    self->jsResolve= nil;
 }
 
 // 地址编码回调
@@ -108,58 +258,49 @@ RCT_EXPORT_METHOD(AMapReGeocodeSearch:(NSDictionary *)coordinate
     if(!self->jsResolve){
         return;
     }
-    self->jsResolve(response);
+    NSArray *data = [[Utils alloc] geocodeFormatData:response];
+    self->jsResolve(data);
     self->jsResolve= nil;
 }
 
 // 逆地址编码回调
 - (void)onReGeocodeSearchDone:(AMapReGeocodeSearchRequest *)request response:(AMapReGeocodeSearchResponse *)response
 {
+  if(!self->jsResolve){
+      return;
+  }
+  NSDictionary *data = [[Utils alloc] regeocodeFormatData:response];
+  self->jsResolve(data);
+  self->jsResolve= nil;
+}
+
+// 行政区划回调
+- (void)onDistrictSearchDone:(AMapDistrictSearchRequest *)request response:(AMapDistrictSearchResponse *)response
+{
     
     if(!self->jsResolve){
         return;
     }
- 
-    NSDictionary *data = @{
-        @"formattedAddress": response.regeocode.formattedAddress,
-        @"addressComponent": @{
-          @"country": response.regeocode.addressComponent.country,
-          @"countryCode": response.regeocode.addressComponent.countryCode,
-          @"province": response.regeocode.addressComponent.province,
-          @"city": response.regeocode.addressComponent.city,
-          @"citycode": response.regeocode.addressComponent.citycode,
-          @"district": response.regeocode.addressComponent.district,
-          @"adcode": response.regeocode.addressComponent.adcode,
-          @"township": response.regeocode.addressComponent.township,
-          @"towncode": response.regeocode.addressComponent.towncode,
-          @"neighborhood": response.regeocode.addressComponent.neighborhood,
-          @"building": response.regeocode.addressComponent.building,
-          @"streetNumber": @{
-            @"street": response.regeocode.addressComponent.streetNumber.street,
-            @"number": response.regeocode.addressComponent.streetNumber.number,
-            @"location": response.regeocode.addressComponent.streetNumber.location,
-            @"distance": @(response.regeocode.addressComponent.streetNumber.distance),
-            @"direction": response.regeocode.addressComponent.streetNumber.direction,
-          },
-          @"businessAreas":  [[Utils alloc] businessFormatData:response.regeocode.addressComponent.businessAreas]
-        },
-        @"roads": [[Utils alloc] roadsFormatData:response.regeocode.roads],
-        @"roadinters":  [[Utils alloc] roadsInterFormatData:response.regeocode.roadinters],
-        @"pois": [[Utils alloc] poiFormatData:response.regeocode.pois],
-        @"aois": [[Utils alloc] aoiFormatData:response.regeocode.aois],
-    };
-
-  self->jsResolve(@{ @"regeocode": data });
-
-  self->jsResolve= nil;
+  
+    if (response == nil)
+    {
+        jsResolve(response);
+        return;
+    }
+  
+  //解析response获取行政区划，具体解析见 Demo
+  self->jsResolve(@{@"count": @(response.count), @"districts": [[Utils alloc] districtFormatData:response.districts]});
 }
 
+// 失败回调
 - (void)AMapSearchRequest:(id)request didFailWithError:(NSError *)error
 {
     RCTLogInfo(@"RNLog didFailWithError");
     self->jsReject(@"amapSearch_failure", @"search request error", error);
     self->jsReject= nil;
 }
+
+
 
 // Don't compile this code when we build for the old architecture.
 #ifdef RCT_NEW_ARCH_ENABLED

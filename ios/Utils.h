@@ -2,7 +2,7 @@
  * @Author: 刘利军
  * @Date: 2023-05-20 21:04:42
  * @LastEditors: 刘利军
- * @LastEditTime: 2023-05-20 21:05:18
+ * @LastEditTime: 2023-07-12 10:30:51
  * @Description: 
  * @PageName: 
  */
@@ -27,7 +27,7 @@
 
 - (NSArray<AMapAOI *> *)aoiFormatData:(NSArray<AMapAOI *> *)data;
 
-- (NSArray *)poiSearchResponseFormatData:(AMapPOISearchResponse *)data;
+- (NSArray<AMapPOI *> *)poiSearchResponseFormatData:(AMapPOISearchResponse *)data;
 
 ///商圈列表 AMapBusinessArea 数组转换
 - (NSArray<AMapBusinessArea *> *)businessFormatData:(NSArray<AMapBusinessArea *> *)data;
@@ -37,6 +37,17 @@
 
 ///道路路口信息 AMapRoadInter 数组
 - (NSArray<AMapRoadInter *> *)roadsInterFormatData:(NSArray<AMapRoadInter *> *)data;
+
+///逆地理编码
+- (NSDictionary *)regeocodeFormatData:(AMapReGeocodeSearchResponse *)data;
+
+///地理编码
+- (NSArray *)geocodeFormatData:(AMapGeocodeSearchResponse *)data;
+
+
+///行政区划
+- (NSArray<AMapDistrict *> *)districtFormatData:(NSArray<AMapDistrict *> *)data;
+
 
 @end
 
