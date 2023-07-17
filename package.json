@@ -1,6 +1,6 @@
 {
   "name": "react-native-amap-search",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "amap data",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
