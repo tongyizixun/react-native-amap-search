@@ -1,21 +1,21 @@
-# @unif/react-native-amap-search
+# react-native-amap-search
 
-amap search
+amap data
 
 ## Installation
 
 ```sh
-npm install @unif/react-native-amap-search
+npm install react-native-amap-search
 ```
 
 ## Usage
 
 ```js
-import { multiply } from '@unif/react-native-amap-search';
+import AmapSearch from "react-native-amap-search";
 
 // ...
 
-const result = await multiply(3, 7);
+const result = await AmapSearch.multiply(3, 7);
 ```
 
 ## Contributing
@@ -25,7 +25,3 @@ See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the 
 ## License
 
 MIT
-
----
-
-Made with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
