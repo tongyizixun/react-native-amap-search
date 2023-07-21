@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  ReactNativeAmapSearchExample
+//  AmapSearchExample
 //
 
 import Foundation

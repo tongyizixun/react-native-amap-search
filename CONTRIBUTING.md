@@ -53,9 +53,9 @@ Remember to add tests for your change if possible. Run the unit tests by:
 yarn test
 ```
 
-To edit the Objective-C or Swift files, open `example/ios/ReactNativeAmapSearchExample.xcworkspace` in XCode and find the source files at `Pods > Development Pods > @unif/react-native-amap-search`.
+To edit the Objective-C or Swift files, open `example/ios/AmapSearchExample.xcworkspace` in XCode and find the source files at `Pods > Development Pods > react-native-amap-search`.
 
-To edit the Java or Kotlin files, open `example/android` in Android studio and find the source files at `unif-react-native-amap-search` under `Android`.
+To edit the Java or Kotlin files, open `example/android` in Android studio and find the source files at `react-native-amap-search` under `Android`.
 
 
 ### Commit message convention

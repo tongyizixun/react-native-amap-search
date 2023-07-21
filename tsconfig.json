@@ -2,12 +2,11 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@unif/react-native-amap-search": ["./src/index"]
+      "react-native-amap-search": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "esModuleInterop": true,
-    "verbatimModuleSyntax": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",
     "lib": ["esnext"],
@@ -23,6 +22,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "esnext"
+    "target": "esnext",
+    "verbatimModuleSyntax": true
   }
 }

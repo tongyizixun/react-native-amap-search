@@ -1,17 +1,17 @@
-# @unif/react-native-amap-search
+# react-native-amap-search
 
 amap search
 
 ## Installation
 
 ```sh
-npm install @unif/react-native-amap-search
+npm install react-native-amap-search
 ```
 
 ## Usage
 
 ```js
-import { multiply } from '@unif/react-native-amap-search';
+import { multiply } from 'react-native-amap-search';
 
 // ...
 
