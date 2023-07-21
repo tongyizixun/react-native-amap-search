@@ -1,15 +1,70 @@
 package com.amapsearch;
 
-import androidx.annotation.NonNull;
 
+import androidx.annotation.NonNull;
+import com.amap.api.services.core.PoiItem;
+import com.amap.api.services.geocoder.AoiItem;
+import com.amap.api.services.geocoder.BusinessArea;
+import com.amap.api.services.geocoder.RegeocodeRoad;
+import com.amap.api.services.geocoder.StreetNumber;
+import com.amap.api.services.road.Crossroad;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.module.annotations.ReactModule;
 
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+// 高德
+
+import com.amap.api.services.core.AMapException;
+import com.amap.api.services.core.PoiItemV2;
+import com.amap.api.services.core.ServiceSettings;
+
+
+import com.amap.api.services.poisearch.PoiResultV2;
+import com.amap.api.services.poisearch.PoiSearchV2;
+import com.amap.api.services.poisearch.PoiSearchV2.OnPoiSearchListener;
+import com.amap.api.services.poisearch.PoiSearchV2.SearchBound;
+
+import com.amap.api.services.geocoder.GeocodeAddress;
+import com.amap.api.services.geocoder.GeocodeQuery;
+import com.amap.api.services.geocoder.GeocodeResult;
+import com.amap.api.services.geocoder.GeocodeSearch;
+import com.amap.api.services.geocoder.GeocodeSearch.OnGeocodeSearchListener;
+import com.amap.api.services.geocoder.RegeocodeQuery;
+import com.amap.api.services.geocoder.RegeocodeResult;
+import com.amap.api.services.core.LatLonPoint;
+
+import com.amap.api.services.help.Inputtips;
+import com.amap.api.services.help.Inputtips.InputtipsListener;
+import com.amap.api.services.help.InputtipsQuery;
+import com.amap.api.services.help.Tip;
+
+import com.amap.api.services.routepoisearch.RoutePOIItem;
+import com.amap.api.services.routepoisearch.RoutePOISearch;
+import com.amap.api.services.routepoisearch.RoutePOISearch.OnRoutePOISearchListener;
+import com.amap.api.services.routepoisearch.RoutePOISearchQuery;
+import com.amap.api.services.routepoisearch.RoutePOISearchResult;
+
+import com.amap.api.services.district.DistrictItem;
+import com.amap.api.services.district.DistrictResult;
+import com.amap.api.services.district.DistrictSearch;
+import com.amap.api.services.district.DistrictSearch.OnDistrictSearchListener;
+import com.amap.api.services.district.DistrictSearchQuery;
+
+
 @ReactModule(name = AmapSearchModule.NAME)
-public class AmapSearchModule extends ReactContextBaseJavaModule {
+public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPoiSearchListener, OnGeocodeSearchListener, OnRoutePOISearchListener, InputtipsListener, OnDistrictSearchListener {
   public static final String NAME = "AmapSearch";
 
   public AmapSearchModule(ReactApplicationContext reactContext) {
