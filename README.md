@@ -1,11 +1,3 @@
-<!--
- * @Author: 刘利军
- * @Date: 2023-07-20 17:56:38
- * @LastEditors: 刘利军
- * @LastEditTime: 2023-07-21 19:17:17
- * @Description: 
- * @PageName: 
--->
 # @unif/react-native-amap-search
 
 amap search
