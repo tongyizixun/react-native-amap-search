@@ -21,6 +21,6 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
-    </application>
      <meta-data android:name="com.amap.api.v2.apikey" android:value="d65e2091b031bfd341e66c9ef9627273" />
+    </application>
 </manifest>

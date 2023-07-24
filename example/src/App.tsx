@@ -3,7 +3,7 @@
  * @Author: 刘利军
  * @Date: 2023-05-20 17:53:20
  * @LastEditors: 刘利军
- * @LastEditTime: 2023-07-21 17:18:16
+ * @LastEditTime: 2023-07-24 10:21:20
  * @Description:
  * @PageName:
  */
@@ -66,7 +66,6 @@ export default function App() {
                 latitude: 31.230483,
                 longitude: 121.353209,
               });
-              console.log('res', res);
               end(res);
             } catch (error) {}
           }}

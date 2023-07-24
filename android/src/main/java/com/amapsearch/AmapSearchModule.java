@@ -67,8 +67,16 @@ import com.amap.api.services.district.DistrictSearchQuery;
 public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPoiSearchListener, OnGeocodeSearchListener, OnRoutePOISearchListener, InputtipsListener, OnDistrictSearchListener {
   public static final String NAME = "AmapSearch";
 
+  private static ReactApplicationContext context;
+  private Promise jsPromise;
+  private PoiSearchV2.Query query; // Poi查询条件类
+  private PoiSearchV2 poiSearch;   // POI搜索
+	private GeocodeSearch geocoderSearch;
+
+
   public AmapSearchModule(ReactApplicationContext reactContext) {
     super(reactContext);
+    context = reactContext;
   }
 
   @Override
