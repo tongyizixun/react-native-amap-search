@@ -1,6 +1,5 @@
 package com.amapsearch;
 
-
 import androidx.annotation.NonNull;
 import com.amap.api.services.core.PoiItem;
 import com.amap.api.services.geocoder.AoiItem;
@@ -393,6 +392,7 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       DistrictSearchQuery query = new DistrictSearchQuery();
       query.setKeywords(keyword);//传入关键字
       query.setShowBoundary(true);//是否返回边界值
+      query.setSubDistrict(subdistrict);
       search.setQuery(query);
       search.setOnDistrictSearchListener(this);//绑定监听器
       search.searchDistrictAsyn();//开始搜索
@@ -418,9 +418,9 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       item.putString("level", districtItem.getLevel());
       item.putString("name",districtItem.getName());
       if(districtItem.getSubDistrict() != null){
-        item.putArray("district", districtFormatData(districtItem.getSubDistrict()));
+        item.putArray("districts", districtFormatData(districtItem.getSubDistrict()));
       }else{
-        item.putArray("district", Arguments.createArray());
+        item.putArray("districts", Arguments.createArray());
       }
       item.putMap("latLonPoint", formatDataLatLonPoint(districtItem.getCenter())); // 经纬度
       item.putArray("polylines", districtBoundaryFormatData(districtItem.districtBoundary()));
