@@ -1,6 +1,6 @@
 {
   "name": "@unif/react-native-amap-search",
-  "version": "0.1.21",
+  "version": "0.1.23",
   "description": "amap search",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
