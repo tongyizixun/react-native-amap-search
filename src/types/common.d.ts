@@ -1,3 +1,11 @@
+/*
+ * @Author: 刘利军
+ * @Date: 2023-07-21 16:32:11
+ * @LastEditors: 刘利军
+ * @LastEditTime: 2023-07-25 13:23:03
+ * @Description:
+ * @PageName:
+ */
 import type {
   AMapDistrictSearchResult,
   AMapGeocodeSearchResult,
@@ -51,8 +59,7 @@ export type ReactNativeAmapSearchType = {
     latitude: number,
     longitude: number
   ) => Promise<AMapPOISearchResult>;
-  aMapPOIIDSearch: (id: string) => promise<AMapPOISearchResult>;
-
+  aMapPOIIDSearch: (id: string) => Promise<AMapPOISearchResult>;
   AMapReGeocodeSearch: (
     latitude: number,
     longitude: number,

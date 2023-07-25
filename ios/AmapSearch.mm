@@ -42,7 +42,7 @@ RCT_EXPORT_METHOD(aMapDistrictSearch:(NSString *)keywords
   AMapDistrictSearchRequest *request = [[AMapDistrictSearchRequest alloc] init];
 
   request.keywords            = keywords;
-  request.requireExtension    = YES;
+  // request.requireExtension    = YES;
   request.page                = currentPage;
   request.offset              = pageSize;
   request.subdistrict         = subdistrict;
@@ -68,11 +68,11 @@ RCT_EXPORT_METHOD(aMapPOIKeywordsSearch:(NSString *)keywords
   request.keywords            = keywords;
   request.city                = city;
   request.types               = types;
-  request.requireExtension    = YES;
+  // request.requireExtension    = YES;
       
   //    搜索SDK 3.2.0 中新增加的功能，只搜索本城市的POI。
   request.cityLimit           = cityLimit ? YES : NO;
-  request.requireSubPOIs      = YES;
+  // request.requireSubPOIs      = YES;
 
   //   设置分页页数
   request.page = currentPage;
@@ -102,7 +102,7 @@ RCT_EXPORT_METHOD(aMapPOIAroundSearch:(NSString *)keywords
   request.city                = city;
   request.radius              = radius;
   request.types               = types;
-  request.requireExtension    = YES;
+  // request.requireExtension    = YES;
   request.location            = [AMapGeoPoint locationWithLatitude:[latitude doubleValue] longitude:[longitude doubleValue]];
       
   /* 按照距离排序. */
@@ -169,7 +169,7 @@ RCT_EXPORT_METHOD(aMapPOIIDSearch:(NSString *)uid
   AMapPOIIDSearchRequest *request = [[AMapPOIIDSearchRequest alloc] init];
       
   request.uid            = uid;
-  request.requireExtension    = YES;
+  // request.requireExtension    = YES;
   self->jsResolve = resolve;
   self->jsReject = reject;
   [self->search AMapPOIIDSearch:request];
@@ -211,7 +211,7 @@ RCT_EXPORT_METHOD(AMapGeocodeSearch:(NSString *)address
   AMapGeocodeSearchRequest *request = [[AMapGeocodeSearchRequest alloc] init];
   request.address = address;
   request.city = city;
-//  request.country = country;
+ request.country = country;
 
   self->jsResolve = resolve;
   self->jsReject = reject;
@@ -294,6 +294,7 @@ RCT_EXPORT_METHOD(AMapReGeocodeSearch:(nonnull NSNumber *)latitude
   
   //解析response获取行政区划，具体解析见 Demo
   self->jsResolve(@{@"count": @(response.count), @"districts": [[AMapUtils alloc] districtFormatData:response.districts]});
+  self->jsResolve= nil;
 }
 
 // 失败回调

@@ -46,11 +46,8 @@ await = init();
 ```
 2. 调用
 ```js
-// 传入参数
-const params =
-  {
-    type: 'around',
-    jsonData: {
+// 周边搜索
+const res = await =  aMapPOIAroundSearch({
       keyword: '星巴克',
       type: '咖啡店',
       city: '上海市',
@@ -59,9 +56,7 @@ const params =
       currentPage: 1,
       pageSize: 25,
       radius: 500,
-    },
-  } || null;
- const res = await =  aMapPOIAroundSearch(params);
+});
 
 ```
 

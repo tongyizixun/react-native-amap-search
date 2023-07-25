@@ -3,7 +3,7 @@
  * @Author: 刘利军
  * @Date: 2023-05-20 17:53:20
  * @LastEditors: 刘利军
- * @LastEditTime: 2023-07-24 10:21:20
+ * @LastEditTime: 2023-07-25 13:27:19
  * @Description:
  * @PageName:
  */
@@ -19,7 +19,7 @@ import {
   aMapPOIKeywordsSearch,
   aMapPOIPolygonSearch,
   init,
-} from '@unif/react-native-amap-search';
+} from 'react-native-amap-search';
 
 const AroundParams = {
   latitude: 31.219234,
