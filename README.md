@@ -1,3 +1,11 @@
+<!--
+ * @Author: 刘利军
+ * @Date: 2023-07-21 19:28:26
+ * @LastEditors: 刘利军
+ * @LastEditTime: 2023-11-06 15:01:46
+ * @Description: 
+ * @PageName: 
+-->
 
 # @unif/react-native-amap-search
 
@@ -8,7 +16,7 @@ amap search
 ```sh
 npm install @unif/react-native-amap-search
 or
-yarn add @td-design/react-native-amap-search
+yarn add @unif/react-native-amap-search
 
 # ios 项目需要更新 pods
 cd ios
@@ -37,12 +45,17 @@ pod install
   <meta-data android:name="com.amap.api.v2.apikey" android:value="你的高德 Key" />
 </application>
 ```
+- js，使用js可省略上面ios、android步骤
+```js
+init({ios:'',android:''});
+```
+
 ## 用法
 
 1. 初始化
 ```js
 import { init, aMapPOIAroundSearch, aMapPOIIDSearch, aMapPOIKeywordsSearch } from '@unif/react-native-amap-search';
-await = init();
+await = init({ios:'', android:''});
 ```
 2. 调用
 ```js

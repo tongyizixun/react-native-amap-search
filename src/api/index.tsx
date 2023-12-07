@@ -9,6 +9,7 @@ import type {
   AMapReGeocodeSearchParams,
   AMapRegeoSearchParams,
   AMapRoutePOISearchType,
+  AppType,
   ReactNativeAmapSearchType,
 } from '../types';
 
@@ -30,7 +31,9 @@ const AmapSearch: ReactNativeAmapSearchType = NativeModules.AmapSearch
     );
 
 // 初始化
-export const init = async () => AmapSearch.initSDK();
+export const init = async (data: AppType) => {
+  return AmapSearch.initSDK(Platform.select(data) || '');
+};
 
 // poi搜索
 export const aMapPOIKeywordsSearch = async ({

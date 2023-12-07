@@ -90,7 +90,7 @@ dependencies {
   //noinspection GradleDynamicVersion
   implementation "com.facebook.react:react-native:+"
   //高德地图搜索功能
-  implementation 'com.amap.api:search:9.5.0' 
+  implementation 'com.amap.api:search:9.7.0' 
 }
 
 if (isNewArchitectureEnabled()) {

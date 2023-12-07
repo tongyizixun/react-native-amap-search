@@ -96,11 +96,7 @@
         @"name": obj.name,
         @"distance": @(obj.distance),
         @"direction": obj.direction,
-        @"latLonPoint": @{
-          @"latitude": @(obj.location.latitude),
-          @"longitude": @(obj.location.longitude)
-        },
-  
+        @"latLonPoint":  [self geoPointFormatData: obj.location]
       }];
     }];
   }
@@ -148,6 +144,18 @@
 // 逆地址编码数据转换
 - (NSDictionary *)regeocodeFormatData:(AMapReGeocodeSearchResponse *)response
 {
+    NSMutableDictionary *streetNumber = [NSMutableDictionary dictionary];
+    if([response.regeocode.addressComponent.streetNumber.street isKindOfClass:[NSString class]]){
+      NSDictionary *streetNumberData = @{
+        @"street": response.regeocode.addressComponent.streetNumber.street,
+        @"number": response.regeocode.addressComponent.streetNumber.number,
+        @"latLonPoint": [self geoPointFormatData: response.regeocode.addressComponent.streetNumber.location],
+        @"distance": @(response.regeocode.addressComponent.streetNumber.distance),
+        @"direction": response.regeocode.addressComponent.streetNumber.direction,
+      };
+      [streetNumber setDictionary:streetNumberData];
+    }
+    
     NSDictionary *data = @{
         @"address": response.regeocode.formattedAddress,
         @"adCode": response.regeocode.addressComponent.adcode,
@@ -161,13 +169,7 @@
         @"neighborhood": response.regeocode.addressComponent.neighborhood,
         @"township": response.regeocode.addressComponent.township,
         @"towncode": response.regeocode.addressComponent.towncode,
-        @"streetNumber": @{
-          @"street": response.regeocode.addressComponent.streetNumber.street,
-          @"number": response.regeocode.addressComponent.streetNumber.number,
-          @"location": response.regeocode.addressComponent.streetNumber.location,
-          @"distance": @(response.regeocode.addressComponent.streetNumber.distance),
-          @"direction": response.regeocode.addressComponent.streetNumber.direction,
-        },
+        @"streetNumber": streetNumber,
         @"businessAreas":  [[AMapUtils alloc] businessFormatData:response.regeocode.addressComponent.businessAreas],
         @"roads": [[AMapUtils alloc] roadsFormatData:response.regeocode.roads],
         @"roadInters":  [[AMapUtils alloc] roadsInterFormatData:response.regeocode.roadinters],

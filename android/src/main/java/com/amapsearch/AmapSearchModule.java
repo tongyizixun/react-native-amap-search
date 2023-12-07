@@ -85,7 +85,8 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
   }
 
   @ReactMethod
-  public void initSDK() {
+  public void initSDK(String key) {
+    ServiceSettings.getInstance().setApiKey(key);
     ServiceSettings.updatePrivacyShow(context, true, true);
     ServiceSettings.updatePrivacyAgree(context, true);
   }
