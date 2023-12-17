@@ -114,6 +114,8 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       item.putString("cityCode", poiItem.getCityCode());       // 城市编码
       item.putString("district", poiItem.getAdName());         // 区域名称
       item.putString("adCode", poiItem.getAdCode());           // 区域编码
+      item.putString("businessArea", poiItem.getBusiness().getBusinessArea());  // 获取商圈名称
+
       return item;
   }
 
@@ -267,7 +269,7 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
     } catch (AMapException e) {
       e.printStackTrace();
     }
-    
+
   }
 
   // 获取POI数据-多边型搜索
@@ -298,7 +300,7 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
     } catch (AMapException e) {
       e.printStackTrace();
     }
-    
+
   }
 
   // 获取POI数据-ID搜索
@@ -656,6 +658,6 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
 
     }
 
- 
-    
+
+
 }

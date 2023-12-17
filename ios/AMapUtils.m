@@ -42,6 +42,7 @@
                                 @"cityCode":obj.citycode, //城市编码
                                 @"district":obj.district, //区域名称
                                 @"adCode":obj.adcode, // 区域编码
+                                @"businessArea": obj.businessArea // 商圈名称 
                                 }];
         
     }];
