@@ -1,12 +1,3 @@
-/*
- * @Author: 刘利军
- * @Date: 2023-07-12 10:42:50
- * @LastEditors: 刘利军
- * @LastEditTime: 2023-07-12 14:46:26
- * @Description:
- * @PageName:
- */
-
 export type AMapPageType = {
   currentPage?: number;
   pageSize?: number;
@@ -24,7 +15,7 @@ export type AMapLatLonMustType = {
 
 export type AMapPOICommonSearchType = {
   keyword?: string;
-  type?: string;
+  types?: string;
   city?: string;
 };
 

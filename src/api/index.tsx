@@ -38,7 +38,7 @@ export const init = async (data: AppType) => {
 // poi搜索
 export const aMapPOIKeywordsSearch = async ({
   keyword = '',
-  type = '',
+  types = '',
   city = '',
   currentPage = 1,
   pageSize = 10,
@@ -46,7 +46,7 @@ export const aMapPOIKeywordsSearch = async ({
 }: AMapPOIKeywordsSearchType) => {
   return AmapSearch.aMapPOIKeywordsSearch(
     keyword,
-    type,
+    types,
     city,
     currentPage,
     pageSize,
@@ -69,14 +69,14 @@ export const aMapRoutePOISearch = async ({
 export const aMapPOIPolygonSearch = async ({
   points,
   keyword = '',
-  type = '',
+  types = '',
   city = '',
   currentPage = 1,
   pageSize = 10,
 }: AMapPOIPolygonSearchType) => {
   return AmapSearch.aMapPOIPolygonSearch(
     keyword,
-    type,
+    types,
     city,
     points,
     currentPage,
@@ -89,7 +89,7 @@ export const aMapPOIAroundSearch = async ({
   latitude,
   longitude,
   keyword = '',
-  type = '',
+  types = '',
   city = '',
   radius = 10000,
   currentPage = 1,
@@ -97,7 +97,7 @@ export const aMapPOIAroundSearch = async ({
 }: AMapPOIAroundSearchType) => {
   return AmapSearch.aMapPOIAroundSearch(
     keyword,
-    type,
+    types,
     city,
     latitude,
     longitude,
@@ -111,14 +111,14 @@ export const aMapPOIAroundSearch = async ({
 export const aMapPOIInputTipsSearch = async ({
   keyword = '',
   city = '',
-  type = '',
+  types = '',
   latitude = 0,
   longitude = 0,
 }: AMapInputTipsSearchType) => {
   return await AmapSearch.aMapPOIInputTipsSearch(
     keyword,
     city,
-    type,
+    types,
     latitude,
     longitude
   );

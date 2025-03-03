@@ -1,11 +1,3 @@
-/*
- * @Author: 刘利军
- * @Date: 2023-07-21 16:32:11
- * @LastEditors: 刘利军
- * @LastEditTime: 2023-11-16 18:29:27
- * @Description:
- * @PageName:
- */
 import type {
   AMapDistrictSearchResult,
   AMapGeocodeSearchResult,

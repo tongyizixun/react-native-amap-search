@@ -316,4 +316,3 @@ RCT_EXPORT_METHOD(AMapReGeocodeSearch:(nonnull NSNumber *)latitude
 }
 
 @end
-

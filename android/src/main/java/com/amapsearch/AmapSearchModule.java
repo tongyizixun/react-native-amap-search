@@ -550,7 +550,7 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
               item.putString("adCode",geocodeAddress.getAdcode());
               item.putString("level",geocodeAddress.getLevel());
               item.putString("neighborhood",geocodeAddress.getNeighborhood());
-              item.putString("township",geocodeAddress.getTownship());
+              item.putString("townShip",geocodeAddress.getTownship());
               item.putString("postCode",geocodeAddress.getPostcode());
               item.putString("province",geocodeAddress.getProvince());
               item.putMap("latLonPoint", formatDataLatLonPoint(geocodeAddress.getLatLonPoint())); // 经纬度
@@ -657,7 +657,4 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       }
 
     }
-
-
-
 }
