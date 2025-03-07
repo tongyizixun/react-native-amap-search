@@ -261,8 +261,14 @@ RCT_EXPORT_METHOD(AMapReGeocodeSearch:(nonnull NSNumber *)latitude
     if(!self->poiJsResolve){
         return;
     }
-    NSArray *resultList = [[AMapUtils alloc] poiSearchResponseFormatData:response];
-    self->poiJsResolve(@{ @"count": @(response.count), @"list": resultList});
+    if(response.pois.count == 0){
+      NSArray *resultList = [NSArray array];
+      self->poiJsResolve(@{ @"count": @(response.pois.count ), @"list": resultList});
+    } else {
+      NSArray *resultList = [[AMapUtils alloc] poiSearchResponseFormatData:response];
+      self->poiJsResolve(@{ @"count": @(response.count), @"list": resultList});
+    }
+  
     self->poiJsResolve= nil;
 }
 
@@ -283,8 +289,13 @@ RCT_EXPORT_METHOD(AMapReGeocodeSearch:(nonnull NSNumber *)latitude
   if(!self->GeocodeJsResolve){
       return;
   }
-  NSDictionary *data = [[AMapUtils alloc] regeocodeFormatData:response];
-  self->GeocodeJsResolve(data);
+  if(response.regeocode != nil){
+    NSDictionary *data = [[AMapUtils alloc] regeocodeFormatData:response];
+    self->GeocodeJsResolve(data);
+  } else {
+    NSDictionary *data = @{};
+    self->GeocodeJsResolve(data);
+  }
   self->GeocodeJsResolve= nil;
 }
 
