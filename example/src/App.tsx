@@ -30,18 +30,21 @@ const AroundParams = {
   // },
   keyword: '星巴克',
   city: '',
-  type: '',
+  types: '',
   currentPage: 1,
   pageSize: 25,
 };
 
 export default function App() {
   React.useEffect(() => {
-    init();
+    init({
+      ios: '26ce677d6223c634b24f34f23e76023f',
+      android: 'd65e2091b031bfd341e66c9ef9627273',
+    });
   }, []);
   const [data, setData] = React.useState<any>();
   const start = () => {
-    setData(JSON.stringify(''));
+    setData(JSON.stringify('开始'));
   };
   // eslint-disable-next-line @typescript-eslint/no-shadow
   const end = (data?: any) => {
@@ -112,8 +115,14 @@ export default function App() {
           style={{ margin: 8, padding: 8, backgroundColor: '#fff' }}
           onPress={async () => {
             start();
-            const res = await aMapPOIIDSearch('B0FFHD1L4T');
-            end(res);
+            try {
+              console.log('start');
+              const res = await aMapPOIIDSearch('B0FFL179OM');
+              console.log('res', res);
+              end(res);
+            } catch (error) {
+              console.log('error', error);
+            }
           }}
         >
           POI ID 搜索
@@ -126,15 +135,16 @@ export default function App() {
               { latitude: 41.060816, longitude: 115.423411 },
               { latitude: 39.442758, longitude: 117.514625 },
             ];
-
             try {
               const res = await aMapPOIPolygonSearch({
                 points,
                 keyword: '',
-                type: '080306',
+                types: '',
               });
+              console.log('res', res);
               end(res);
             } catch (error) {
+              console.log('error', error);
               end();
             }
           }}

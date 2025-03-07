@@ -276,7 +276,7 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
   @ReactMethod
   public void aMapPOIPolygonSearch(String keyword, String types, String city,
                                    ReadableArray points,
-                                   Integer currentPage,
+                                    Integer currentPage,
                                     Integer pageSize,
                                     Promise promise) {
 
@@ -573,8 +573,13 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       }
       if (rCode == AMapException.CODE_AMAP_SUCCESS) {
         WritableMap item = Arguments.createMap();
-        item.putInt("count", result.getCount());
-        item.putArray("list", formatDataPoisV2(result.getPois()));
+        if (result != null) {
+          item.putInt("count", result.getCount());
+          item.putArray("list", formatDataPoisV2(result.getPois()));
+        } else {
+          item.putInt("count", 0);
+          item.putArray("list", Arguments.createArray());
+        }
         this.jsPromise.resolve(item);
       } else {
         this.jsPromise.reject("onPoiSearched: ", String.valueOf(rCode));
@@ -590,13 +595,17 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       }
       if (rCode == AMapException.CODE_AMAP_SUCCESS) {
         WritableArray array = Arguments.createArray();
-        array.pushMap(formatDataPoiV2(poiItem));
         WritableMap item = Arguments.createMap();
-        item.putInt("count", 1);
+        if (poiItem != null) {
+          array.pushMap(formatDataPoiV2(poiItem));
+          item.putInt("count", 1);
+        } else {
+          item.putInt("count", 0);
+        }
         item.putArray("list", array);
         this.jsPromise.resolve(item);
       } else {
-        this.jsPromise.reject("onPoiItemSearched: ", String.valueOf(rCode));
+        this.jsPromise.reject("onPoiItemSearched: ", "error");
       }
       this.jsPromise = null;
     }
@@ -609,20 +618,24 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       }
       if (rCode == AMapException.CODE_AMAP_SUCCESS) {
         WritableArray array = Arguments.createArray();
-        for (int i = 0; i < tipList.size(); i++) {
-          Tip tip = tipList.get(i);
-          WritableMap item= Arguments.createMap();
-          item.putString("adCode", tip.getAdcode());
-          item.putString("district", tip.getDistrict());
-          item.putString("typeCode", tip.getTypeCode());
-          item.putString("name", tip.getName());
-          item.putString("uid", tip.getPoiID());
-          item.putString("address", tip.getAddress());
-          item.putMap("latLonPoint", formatDataLatLonPoint(tip.getPoint()));
-          array.pushMap(item);
-        }
         WritableMap resolveItem= Arguments.createMap();
-        resolveItem.putInt("count", tipList.size());
+        if (tipList!=null) {
+          for (int i = 0; i < tipList.size(); i++) {
+            Tip tip = tipList.get(i);
+            WritableMap item= Arguments.createMap();
+            item.putString("adCode", tip.getAdcode());
+            item.putString("district", tip.getDistrict());
+            item.putString("typeCode", tip.getTypeCode());
+            item.putString("name", tip.getName());
+            item.putString("uid", tip.getPoiID());
+            item.putString("address", tip.getAddress());
+            item.putMap("latLonPoint", formatDataLatLonPoint(tip.getPoint()));
+            array.pushMap(item);
+          }
+          resolveItem.putInt("count", tipList.size());
+        } else {
+          resolveItem.putInt("count", 0);
+        }
         resolveItem.putArray("list", array);
         this.jsPromise.resolve(resolveItem);
       } else {
@@ -638,18 +651,26 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       }
       if (rCode == AMapException.CODE_AMAP_SUCCESS) {
         WritableArray array = Arguments.createArray();
-        List<RoutePOIItem> poiItems = result.getRoutePois();
-        for(int i = 0 ; i< poiItems.size(); i++){
-          WritableMap item = Arguments.createMap();
-          RoutePOIItem poiItem = poiItems.get(i);
-          item.putString("uid",poiItem.getID());
-          item.putString("name",poiItem.getTitle()); //名称
-          item.putMap("latLonPoint",formatDataLatLonPoint(poiItem.getPoint())); // 经纬度
-          item.putDouble("distance", poiItem.getDistance());  //距中心点的距离，单位米
-          array.pushMap(item);
-        }
         WritableMap resolveItem= Arguments.createMap();
-        resolveItem.putInt("count", poiItems.size());
+        if( result!=null){
+          List<RoutePOIItem> poiItems = result.getRoutePois();
+          if (poiItems != null && poiItems.size() > 0) {
+            for(int i = 0 ; i< poiItems.size(); i++){
+              WritableMap item = Arguments.createMap();
+              RoutePOIItem poiItem = poiItems.get(i);
+              item.putString("uid",poiItem.getID());
+              item.putString("name",poiItem.getTitle()); //名称
+              item.putMap("latLonPoint",formatDataLatLonPoint(poiItem.getPoint())); // 经纬度
+              item.putDouble("distance", poiItem.getDistance());  //距中心点的距离，单位米
+              array.pushMap(item);
+            }
+            resolveItem.putInt("count", poiItems.size());
+           }else { 
+            resolveItem.putInt("count", 0);
+          }
+        } else {
+          resolveItem.putInt("count", 0);
+        }
         resolveItem.putArray("list", array);
         this.jsPromise.resolve(resolveItem);
       } else {
