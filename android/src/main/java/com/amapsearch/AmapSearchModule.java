@@ -499,26 +499,87 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       return;
     }
     if (rCode == AMapException.CODE_AMAP_SUCCESS) {
-      if (result != null && result.getRegeocodeAddress() != null) {
+      if (result != null && result.getRegeocodeAddress() != null && result.getRegeocodeAddress().getFormatAddress() != null) {
         WritableMap reGeoCodeAddress = Arguments.createMap();
         reGeoCodeAddress.putString("address", result.getRegeocodeAddress().getFormatAddress());
         reGeoCodeAddress.putString("adCode", result.getRegeocodeAddress().getAdCode());
         reGeoCodeAddress.putString("cityCode", result.getRegeocodeAddress().getCityCode());
         reGeoCodeAddress.putString("city", result.getRegeocodeAddress().getCity());
-        reGeoCodeAddress.putString("province", result.getRegeocodeAddress().getProvince());
-        reGeoCodeAddress.putString("district", result.getRegeocodeAddress().getDistrict());
-        reGeoCodeAddress.putString("country", result.getRegeocodeAddress().getCountry());
-        reGeoCodeAddress.putString("countryCode", result.getRegeocodeAddress().getCountryCode());
-        reGeoCodeAddress.putString("building", result.getRegeocodeAddress().getBuilding());
-        reGeoCodeAddress.putString("neighborhood", result.getRegeocodeAddress().getNeighborhood());
-        reGeoCodeAddress.putString("townCode", result.getRegeocodeAddress().getTowncode());
-        reGeoCodeAddress.putString("townShip", result.getRegeocodeAddress().getTownship());
-        reGeoCodeAddress.putMap("streetNumber", formatDataStreetNumber(result.getRegeocodeAddress().getStreetNumber()));
-        reGeoCodeAddress.putArray("businessAreas", formatDataBusiness(result.getRegeocodeAddress().getBusinessAreas()));
-        reGeoCodeAddress.putArray("roadInters", formatDataRoadInters(result.getRegeocodeAddress().getCrossroads()));
-        reGeoCodeAddress.putArray("roads", formatDataRoads(result.getRegeocodeAddress().getRoads()));
-        reGeoCodeAddress.putArray("pois", formatDataPoi(result.getRegeocodeAddress().getPois()));
-        reGeoCodeAddress.putArray("aois", formatDataAoi(result.getRegeocodeAddress().getAois()));
+        try {
+          reGeoCodeAddress.putString("province", result.getRegeocodeAddress().getProvince());
+        } catch(Exception e){
+          reGeoCodeAddress.putString("province", "");
+        }
+        try {
+          reGeoCodeAddress.putString("district", result.getRegeocodeAddress().getDistrict());
+        } catch(Exception e){
+          reGeoCodeAddress.putString("district", "");
+        }
+
+        try {
+          reGeoCodeAddress.putString("country", result.getRegeocodeAddress().getCountry());
+        } catch(Exception e){
+          reGeoCodeAddress.putString("country", "");
+        }
+
+        try {
+          reGeoCodeAddress.putString("countryCode", result.getRegeocodeAddress().getCountryCode());
+        } catch(Exception e){
+          reGeoCodeAddress.putString("countryCode", "");
+        }
+       
+        try {
+          reGeoCodeAddress.putString("building", result.getRegeocodeAddress().getBuilding());
+        } catch(Exception e){
+          reGeoCodeAddress.putString("building", "");
+        }
+
+        try {
+          reGeoCodeAddress.putString("neighborhood", result.getRegeocodeAddress().getNeighborhood());
+        } catch(Exception e){
+          reGeoCodeAddress.putString("neighborhood", "");
+        }
+
+        try {
+          reGeoCodeAddress.putString("townCode", result.getRegeocodeAddress().getTowncode());
+        } catch(Exception e){
+          reGeoCodeAddress.putString("townCode", "");
+        }
+
+        try {
+          reGeoCodeAddress.putString("townShip", result.getRegeocodeAddress().getTownship());
+        } catch(Exception e){
+          reGeoCodeAddress.putString("townShip", "");
+        }
+
+        try {
+          reGeoCodeAddress.putMap("streetNumber", formatDataStreetNumber(result.getRegeocodeAddress().getStreetNumber()));
+        } catch(Exception e){
+        }
+
+        try {
+          reGeoCodeAddress.putArray("businessAreas", formatDataBusiness(result.getRegeocodeAddress().getBusinessAreas()));
+        } catch(Exception e){
+        }
+
+        try {
+          reGeoCodeAddress.putArray("roadInters", formatDataBusiness(result.getRegeocodeAddress().getBusinessAreas()));
+        } catch(Exception e){
+        }
+
+        try {
+          reGeoCodeAddress.putArray("roads", formatDataRoads(result.getRegeocodeAddress().getRoads()));
+        } catch(Exception e){
+        }
+
+        try {
+          reGeoCodeAddress.putArray("pois", formatDataPoi(result.getRegeocodeAddress().getPois()));
+        } catch(Exception e){
+        }
+        try {
+          reGeoCodeAddress.putArray("aois", formatDataAoi(result.getRegeocodeAddress().getAois()));
+        } catch(Exception e){
+        }
         this.jsPromise.resolve(reGeoCodeAddress);
       } else {
         this.jsPromise.reject(onReGeoCodeSearchedError, "no result");
