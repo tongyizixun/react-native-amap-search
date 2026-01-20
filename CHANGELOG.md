@@ -9,35 +9,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **完整的 POI 扩展信息支持** 🎉
-  - Android: 使用 `Business` 对象获取所有扩展字段（营业时间、评分、人均消费等）
+  - Android: 使用 `Business` 对象获取所有扩展字段
   - Android: 自动设置 `ShowFields.ALL` 以请求完整数据
   - iOS: 使用 `AMapBusinessData` 对象获取所有扩展字段（Since 9.4.0）
-  - **两端功能完全对等！** 均支持以下字段：
+  - iOS: 设置 `showFieldsType = AMapPOISearchShowFieldsTypeAll` 请求完整数据
+  - **两端功能完全对等！** 均支持以下字段（均在 `business` 对象中）：
+    - `businessArea` - 商圈名称
+    - `location` - 商圈中心点 (iOS 独有)
+    - `openTime` - 营业时间（周）
+    - `openTimeToday` - 今日营业时间
+    - `rating` - 评分
+    - `cost` - 人均消费
     - `tel` - 电话号码
     - `tag` - 特色内容标签
     - `parkingType` - 停车场类型
     - `alias` - POI 别名
-    - `cost` - 人均消费
-    - `rating` - 评分
-    - `openTime` - 营业时间（周）
-    - `openTimeToday` - 今日营业时间
+  - `poiExtension` 对象包含：
     - `photos` - 图片列表
 
 ### Changed
-- **TypeScript 类型定义增强**
-  - `AMapPoiExtensionType` 新增 `openTimeToday`、`cost` 字段
-  - `AMapPOISearchListItem` 新增 `tel`、`tag`、`parkingType`、`alias` 字段
-  - 所有扩展字段均为可选类型（`?`），保持跨平台兼容性
+- **⚠️ BREAKING CHANGE: 数据结构调整**
+  - 所有 `Business`/`AMapBusinessData` 字段统一放在 `business` 对象中
+  - 从 POI 顶层移除：`tel`, `tag`, `parkingType`, `alias`
+  - 从 `poiExtension` 移除：`openTime`, `openTimeToday`, `rating`, `cost`
+  - 以上字段现在都在 `business` 对象中
+  - `poiExtension` 现在只包含 `photos` 数组
+  - **数据结构示例**：
+    ```typescript
+    {
+      uid: "xxx",
+      name: "xxx",
+      // ... 其他基础字段
+      business: {
+        businessArea: "xxx",
+        openTime: "xxx",
+        openTimeToday: "xxx",
+        rating: "xxx",
+        cost: "xxx",
+        tel: "xxx",
+        tag: "xxx",
+        parkingType: "xxx",
+        alias: "xxx"
+      },
+      poiExtension: {
+        photos: [{ title: "xxx", url: "xxx" }]
+      }
+    }
+    ```
+- **TypeScript 类型定义更新**
+  - `AMapBusinessType` 包含所有 Business 字段
+  - `AMapPoiExtensionType` 只包含 `photos`
+  - `AMapPOISearchListItem` 移除顶层的扩展字段
 
 ### Fixed
 - 修复 Android 端扩展信息始终为空的问题（需要设置 ShowFields）
 - 修复 iOS 端扩展信息始终为空的问题（需要设置 showFieldsType）
 - 修复 Business 对象字段未正确获取的问题
-
-### Important Notes
-- **Android SDK**: 需要设置 `ShowFields.ALL` 来获取完整扩展信息
-- **iOS SDK**: 需要设置 `showFieldsType = AMapPOISearchShowFieldsTypeAll` 来获取完整扩展信息
-- 两端配置方式不同，但功能完全对等
 
 ### Technical Details
 - **Android SDK v9.7.0**
@@ -46,22 +73,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Business 类包含所有扩展字段
 - **iOS SDK 9.4.0+**
   - 使用 `AMapPOI.businessData` 获取 `AMapBusinessData` 对象
-  - 使用 `request.showFieldsType = AMapPOISearchShowFieldsTypeAll` 请求完整数据（关键！）
+  - 使用 `request.showFieldsType = AMapPOISearchShowFieldsTypeAll` 请求完整数据
   - AMapBusinessData 类包含所有扩展字段（与Android Business完全对应）
   - 兜底机制：businessData → extensionInfo → 直接属性
 
-### Platform Support
-| 字段 | Android | iOS | 说明 |
-|------|---------|-----|------|
-| `tel` | ✅ | ✅ | 电话号码 |
-| `tag` | ✅ | ✅ | 特色内容标签 |
-| `parkingType` | ✅ | ✅ | 停车场类型 |
-| `alias` | ✅ | ✅ | POI 别名 |
-| `cost` | ✅ | ✅ | 人均消费 |
-| `rating` | ✅ | ✅ | 评分 |
-| `openTime` | ✅ | ✅ | 营业时间（周） |
-| `openTimeToday` | ✅ | ✅ | 今日营业时间 |
-| `photos` | ✅ | ✅ | 图片列表 |
+### Data Structure
+```typescript
+// POI 搜索结果的数据结构
+{
+  uid, name, type, typeCode, latLonPoint, address,
+  province, provinceCode, city, cityCode, district, adCode,
+
+  business: {  // 所有 Business 对象的字段都在这里
+    businessArea?: string;
+    location?: LatLon;  // iOS 独有
+    openTime?: string;
+    openTimeToday?: string;
+    rating?: string;
+    cost?: string;
+    tel?: string;
+    tag?: string;
+    parkingType?: string;
+    alias?: string;
+  },
+
+  poiExtension: {  // 只包含 photos
+    photos?: Array<{title: string; url: string}>;
+  }
+}
+```
 
 **所有扩展字段两端均完全支持！**
 
