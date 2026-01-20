@@ -27,69 +27,97 @@
   if(data.count>0){
     resultList = [NSMutableArray arrayWithCapacity: data.count];
     [data enumerateObjectsUsingBlock:^(AMapPOI *obj, NSUInteger idx, BOOL *stop) {
-        // 构建商圈对象
+        // 构建 business 对象 - 所有 businessData 字段都放在这里
         NSMutableDictionary *business = [NSMutableDictionary dictionary];
-        // 优先使用 businessData 对象（Since 9.4.0）
-        if (obj.businessData && obj.businessData.businessArea) {
-          business[@"businessArea"] = obj.businessData.businessArea;
+
+        // 优先使用 businessData 对象（Since 9.4.0，与Android Business对应）
+        if (obj.businessData) {
+          // 商圈名称
+          if (obj.businessData.businessArea) {
+            business[@"businessArea"] = obj.businessData.businessArea;
+          }
+
+          // 营业时间（周）
+          if ([obj.businessData.opentimeWeek isKindOfClass:[NSString class]] && obj.businessData.opentimeWeek.length > 0) {
+            business[@"openTime"] = obj.businessData.opentimeWeek;
+          }
+
+          // 今日营业时间
+          if ([obj.businessData.opentimeToday isKindOfClass:[NSString class]] && obj.businessData.opentimeToday.length > 0) {
+            business[@"openTimeToday"] = obj.businessData.opentimeToday;
+          }
+
+          // 评分
+          if ([obj.businessData.rating isKindOfClass:[NSString class]] && obj.businessData.rating.length > 0) {
+            business[@"rating"] = obj.businessData.rating;
+          }
+
+          // 人均消费
+          if ([obj.businessData.cost isKindOfClass:[NSString class]] && obj.businessData.cost.length > 0) {
+            business[@"cost"] = obj.businessData.cost;
+          }
+
+          // 电话号码
+          if ([obj.businessData.tel isKindOfClass:[NSString class]] && obj.businessData.tel.length > 0) {
+            business[@"tel"] = obj.businessData.tel;
+          }
+
+          // 特色内容
+          if ([obj.businessData.tag isKindOfClass:[NSString class]] && obj.businessData.tag.length > 0) {
+            business[@"tag"] = obj.businessData.tag;
+          }
+
+          // 停车场类型
+          if ([obj.businessData.parkingType isKindOfClass:[NSString class]] && obj.businessData.parkingType.length > 0) {
+            business[@"parkingType"] = obj.businessData.parkingType;
+          }
+
+          // 别名
+          if ([obj.businessData.alias isKindOfClass:[NSString class]] && obj.businessData.alias.length > 0) {
+            business[@"alias"] = obj.businessData.alias;
+          }
+
           // iOS POI 对象中商圈可能没有中心点坐标，设置为 POI 位置
           if (obj.location) {
             business[@"location"] = [self geoPointFormatData:obj.location];
           }
-        } else if ([obj.businessArea isKindOfClass:[NSString class]] && obj.businessArea.length > 0) {
-          // 兜底使用旧版 businessArea 属性
-          business[@"businessArea"] = obj.businessArea;
+        } else {
+          // 兜底：使用旧版属性
+          if ([obj.businessArea isKindOfClass:[NSString class]] && obj.businessArea.length > 0) {
+            business[@"businessArea"] = obj.businessArea;
+          }
+          if ([obj.opentime isKindOfClass:[NSString class]] && obj.opentime.length > 0) {
+            business[@"openTime"] = obj.opentime;
+          }
+          if ([obj.rating isKindOfClass:[NSString class]] && obj.rating.length > 0) {
+            business[@"rating"] = obj.rating;
+          }
+          if ([obj.tel isKindOfClass:[NSString class]] && obj.tel.length > 0) {
+            business[@"tel"] = obj.tel;
+          }
+          if ([obj.parkingType isKindOfClass:[NSString class]] && obj.parkingType.length > 0) {
+            business[@"parkingType"] = obj.parkingType;
+          }
           if (obj.location) {
             business[@"location"] = [self geoPointFormatData:obj.location];
           }
+
+          // 兜底：使用 extensionInfo
+          if (obj.extensionInfo) {
+            if (!business[@"openTime"] && [obj.extensionInfo.openTime isKindOfClass:[NSString class]] && obj.extensionInfo.openTime.length > 0) {
+              business[@"openTime"] = obj.extensionInfo.openTime;
+            }
+            if (!business[@"rating"] && [obj.extensionInfo.rating isKindOfClass:[NSString class]] && obj.extensionInfo.rating.length > 0) {
+              business[@"rating"] = obj.extensionInfo.rating;
+            }
+            if ([obj.extensionInfo.cost isKindOfClass:[NSString class]] && obj.extensionInfo.cost.length > 0) {
+              business[@"cost"] = obj.extensionInfo.cost;
+            }
+          }
         }
 
-        // 构建扩展信息对象
+        // 构建 poiExtension 对象 - 只放 photos（来自 images，不是 businessData）
         NSMutableDictionary *poiExtension = [NSMutableDictionary dictionary];
-
-        // 优先使用 businessData 对象（Since 9.4.0，与Android Business对应）
-        if (obj.businessData) {
-          if ([obj.businessData.opentimeWeek isKindOfClass:[NSString class]] && obj.businessData.opentimeWeek.length > 0) {
-            poiExtension[@"openTime"] = obj.businessData.opentimeWeek;
-          }
-          if ([obj.businessData.opentimeToday isKindOfClass:[NSString class]] && obj.businessData.opentimeToday.length > 0) {
-            poiExtension[@"openTimeToday"] = obj.businessData.opentimeToday;
-          }
-          if ([obj.businessData.rating isKindOfClass:[NSString class]] && obj.businessData.rating.length > 0) {
-            poiExtension[@"rating"] = obj.businessData.rating;
-          }
-          if ([obj.businessData.cost isKindOfClass:[NSString class]] && obj.businessData.cost.length > 0) {
-            poiExtension[@"cost"] = obj.businessData.cost;
-          }
-        }
-
-        // 兜底：使用 extensionInfo 对象（ID查询时有效）
-        if (obj.extensionInfo) {
-          if (poiExtension[@"openTime"] == nil &&
-              [obj.extensionInfo.openTime isKindOfClass:[NSString class]] && obj.extensionInfo.openTime.length > 0) {
-            poiExtension[@"openTime"] = obj.extensionInfo.openTime;
-          }
-          if (poiExtension[@"rating"] == nil &&
-              [obj.extensionInfo.rating isKindOfClass:[NSString class]] && obj.extensionInfo.rating.length > 0) {
-            poiExtension[@"rating"] = obj.extensionInfo.rating;
-          }
-          if (poiExtension[@"cost"] == nil &&
-              [obj.extensionInfo.cost isKindOfClass:[NSString class]] && obj.extensionInfo.cost.length > 0) {
-            poiExtension[@"cost"] = obj.extensionInfo.cost;
-          }
-        }
-
-        // 再兜底：使用直接属性（旧版）
-        if (poiExtension[@"openTime"] == nil &&
-            [obj.opentime isKindOfClass:[NSString class]] && obj.opentime.length > 0) {
-          poiExtension[@"openTime"] = obj.opentime;
-        }
-        if (poiExtension[@"rating"] == nil &&
-            [obj.rating isKindOfClass:[NSString class]] && obj.rating.length > 0) {
-          poiExtension[@"rating"] = obj.rating;
-        }
-
-        // 处理照片列表
         if (obj.images && obj.images.count > 0) {
           NSMutableArray *photos = [NSMutableArray arrayWithCapacity:obj.images.count];
           [obj.images enumerateObjectsUsingBlock:^(AMapImage *image, NSUInteger idx, BOOL *stop) {
@@ -121,34 +149,9 @@
           @"cityCode": obj.citycode, // 城市编码
           @"district": obj.district, // 区域名称
           @"adCode": obj.adcode, // 区域编码
-          @"business": business.count > 0 ? business : @{}, // 商圈对象，空字典而不是 null
-          @"poiExtension": poiExtension.count > 0 ? poiExtension : @{} // 扩展信息对象，空字典而不是 null
+          @"business": business.count > 0 ? business : @{}, // business 对象，包含所有 businessData 字段
+          @"poiExtension": poiExtension.count > 0 ? poiExtension : @{} // poiExtension 对象，只包含 photos
         } mutableCopy];
-
-        // 获取扩展字段 - 与Android保持一致的数据结构
-        // 优先使用 businessData 对象（Since 9.4.0，与Android Business对应）
-        if (obj.businessData) {
-          if ([obj.businessData.tel isKindOfClass:[NSString class]] && obj.businessData.tel.length > 0) {
-            poiData[@"tel"] = obj.businessData.tel;
-          }
-          if ([obj.businessData.tag isKindOfClass:[NSString class]] && obj.businessData.tag.length > 0) {
-            poiData[@"tag"] = obj.businessData.tag;
-          }
-          if ([obj.businessData.parkingType isKindOfClass:[NSString class]] && obj.businessData.parkingType.length > 0) {
-            poiData[@"parkingType"] = obj.businessData.parkingType;
-          }
-          if ([obj.businessData.alias isKindOfClass:[NSString class]] && obj.businessData.alias.length > 0) {
-            poiData[@"alias"] = obj.businessData.alias;
-          }
-        } else {
-          // 兜底：使用 POI 直接属性（旧版）
-          if ([obj.tel isKindOfClass:[NSString class]] && obj.tel.length > 0) {
-            poiData[@"tel"] = obj.tel;
-          }
-          if ([obj.parkingType isKindOfClass:[NSString class]] && obj.parkingType.length > 0) {
-            poiData[@"parkingType"] = obj.parkingType;
-          }
-        }
 
         [resultList addObject:poiData];
 

@@ -117,7 +117,7 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       item.putString("district", poiItem.getAdName());         // 区域名称
       item.putString("adCode", poiItem.getAdCode());           // 区域编码
 
-      // 获取商圈信息 - Business 对象包含所有扩展信息！
+      // 获取 Business 对象 - 所有 Business 字段都放在 business 里
       WritableMap business = Arguments.createMap();
       WritableMap poiExtension = Arguments.createMap();
 
@@ -131,52 +131,52 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
             business.putString("businessArea", businessArea);
           }
 
-          // 营业时间
+          // 营业时间（周）
           String openTimeWeek = businessObj.getOpentimeWeek();
           if (openTimeWeek != null && !openTimeWeek.isEmpty()) {
-            poiExtension.putString("openTime", openTimeWeek);
+            business.putString("openTime", openTimeWeek);
           }
 
           // 今日营业时间
           String openTimeToday = businessObj.getOpentimeToday();
           if (openTimeToday != null && !openTimeToday.isEmpty()) {
-            poiExtension.putString("openTimeToday", openTimeToday);
+            business.putString("openTimeToday", openTimeToday);
           }
 
           // 评分
           String rating = businessObj.getmRating();
           if (rating != null && !rating.isEmpty()) {
-            poiExtension.putString("rating", rating);
+            business.putString("rating", rating);
           }
 
           // 人均消费
           String cost = businessObj.getCost();
           if (cost != null && !cost.isEmpty()) {
-            poiExtension.putString("cost", cost);
+            business.putString("cost", cost);
           }
 
           // 电话号码
           String tel = businessObj.getTel();
           if (tel != null && !tel.isEmpty()) {
-            item.putString("tel", tel);
+            business.putString("tel", tel);
           }
 
           // 特色内容
           String tag = businessObj.getTag();
           if (tag != null && !tag.isEmpty()) {
-            item.putString("tag", tag);
+            business.putString("tag", tag);
           }
 
           // 停车场类型
           String parkingType = businessObj.getParkingType();
           if (parkingType != null && !parkingType.isEmpty()) {
-            item.putString("parkingType", parkingType);
+            business.putString("parkingType", parkingType);
           }
 
           // 别名
           String alias = businessObj.getAlias();
           if (alias != null && !alias.isEmpty()) {
-            item.putString("alias", alias);
+            business.putString("alias", alias);
           }
         } catch (Exception e) {
           // 忽略异常，返回空对象

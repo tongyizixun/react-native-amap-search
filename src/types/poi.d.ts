@@ -19,19 +19,23 @@ export type AMapPhotoType = {
   url: string; // 照片URL
 };
 
-// POI 扩展信息类型
+// POI 扩展信息类型（只包含 photos）
 export type AMapPoiExtensionType = {
+  photos?: AMapPhotoType[]; // 照片列表
+};
+
+// 商圈信息类型（Business）- 包含所有 Business 对象的字段
+export type AMapBusinessType = {
+  businessArea?: string; // 商圈名称
+  location?: AMapLatLonMustType; // 商圈中心点
   openTime?: string; // 营业时间（周）
   openTimeToday?: string; // 今日营业时间
   rating?: string; // 评分
   cost?: string; // 人均消费
-  photos?: AMapPhotoType[]; // 照片列表
-};
-
-// 商圈信息类型（Business）
-export type AMapBusinessType = {
-  businessArea?: string; // 商圈名称
-  location?: AMapLatLonMustType; // 商圈中心点
+  tel?: string; // 电话号码
+  tag?: string; // 特色内容
+  parkingType?: string; // 停车场类型
+  alias?: string; // 别名
 };
 
 export type AMapPOICommonSearchType = {
@@ -82,12 +86,8 @@ export type AMapPOISearchListItem = {
   cityCode: string; // 城市编码
   district: string; // 区域名称
   adCode: string; // 区域编码
-  business: AMapBusinessType; // 商圈信息对象（可能为空对象）
-  poiExtension: AMapPoiExtensionType; // POI 扩展信息（可能为空对象）
-  tel?: string; // 电话号码
-  tag?: string; // 特色内容
-  parkingType?: string; // 停车场类型
-  alias?: string; // 别名
+  business: AMapBusinessType; // business 对象（包含所有 Business/businessData 字段）
+  poiExtension: AMapPoiExtensionType; // poiExtension 对象（只包含 photos）
 };
 
 // poi搜索回调

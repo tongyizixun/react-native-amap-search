@@ -82,9 +82,7 @@ export default function App() {
                   if (
                     poi &&
                     (Object.keys(poi.business || {}).length > 0 ||
-                      Object.keys(poi.poiExtension || {}).length > 0 ||
-                      poi.tel ||
-                      poi.tag)
+                      Object.keys(poi.poiExtension || {}).length > 0)
                   ) {
                     poiWithData = poi;
                     break;
@@ -118,7 +116,9 @@ export default function App() {
                   })`
                 );
 
-                console.log('\n📍 商圈信息 (business):');
+                console.log(
+                  '\n📍 商圈信息 (business) - 包含所有 Business 字段:'
+                );
                 console.log(JSON.stringify(poiWithData!.business, null, 2));
                 const businessKeys = Object.keys(poiWithData!.business || {});
                 console.log(
@@ -127,7 +127,7 @@ export default function App() {
                   }]`
                 );
 
-                console.log('\n⭐ 扩展信息 (poiExtension):');
+                console.log('\n⭐ 扩展信息 (poiExtension) - 只包含 photos:');
                 console.log(JSON.stringify(poiWithData!.poiExtension, null, 2));
                 const extKeys = Object.keys(poiWithData!.poiExtension || {});
                 console.log(
@@ -136,45 +136,25 @@ export default function App() {
                   }]`
                 );
 
-                // 显示顶级扩展字段
-                const topLevelExt = [];
-                if (poiWithData!.tel)
-                  topLevelExt.push(`tel: ${poiWithData!.tel}`);
-                if (poiWithData!.tag)
-                  topLevelExt.push(`tag: ${poiWithData!.tag}`);
-                if (poiWithData!.parkingType)
-                  topLevelExt.push(`parkingType: ${poiWithData!.parkingType}`);
-                if (poiWithData!.alias)
-                  topLevelExt.push(`alias: ${poiWithData!.alias}`);
-
-                if (topLevelExt.length > 0) {
-                  console.log('\n🏷️  顶级扩展字段:');
-                  topLevelExt.forEach((item) => console.log(`  ${item}`));
-                }
-
                 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
-                console.log('\n【平台差异说明】');
-                console.log('• business 对象:');
-                console.log('  - Android: { businessArea: "商圈名" } 或 {}');
+                console.log('\n【数据结构说明】');
                 console.log(
-                  '  - iOS: { businessArea: "商圈名", location: {...} } 或 {}'
+                  '• business 对象: 包含所有 Business/businessData 字段'
                 );
-                console.log('• poiExtension 对象:');
-                console.log(
-                  '  - Android: 完整支持 { openTime, openTimeToday, rating, cost, photos }'
-                );
-                console.log(
-                  '  - iOS: 支持 { openTime, rating, photos }（无 cost 和 openTimeToday）'
-                );
-                console.log('• 顶级扩展字段:');
-                console.log(
-                  '  - Android: tel, tag, parkingType, alias（来自 Business 对象）'
-                );
-                console.log('  - iOS: shopID, email（来自 AMapPOI 属性）');
-                console.log(
-                  '\n✨ 重大发现：Android Business 对象包含所有扩展信息！'
-                );
+                console.log('  - businessArea: 商圈名称');
+                console.log('  - location: 商圈中心点 (iOS 独有)');
+                console.log('  - openTime: 营业时间（周）');
+                console.log('  - openTimeToday: 今日营业时间');
+                console.log('  - rating: 评分');
+                console.log('  - cost: 人均消费');
+                console.log('  - tel: 电话号码');
+                console.log('  - tag: 特色内容');
+                console.log('  - parkingType: 停车场类型');
+                console.log('  - alias: 别名');
+                console.log('• poiExtension 对象: 只包含 photos');
+                console.log('  - photos: 照片列表 [{ title, url }]');
+                console.log('\n✨ 两端数据结构完全一致！');
 
                 end(result);
               } else {
