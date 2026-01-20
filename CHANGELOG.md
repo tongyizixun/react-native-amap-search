@@ -9,31 +9,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **完整的 POI 扩展信息支持** 🎉
-  - Android: 新增获取 Business 对象的所有字段（营业时间、评分、人均消费等）
+  - Android: 使用 `Business` 对象获取所有扩展字段（营业时间、评分、人均消费等）
   - Android: 自动设置 `ShowFields.ALL` 以请求完整数据
-  - 新增 `openTimeToday` 字段 - 今日营业时间（Android 独有）
-  - 新增 `tel` 字段 - 电话号码
-  - 新增 `tag` 字段 - 特色内容标签（Android 独有）
-  - 新增 `parkingType` 字段 - 停车场类型
-  - 新增 `alias` 字段 - POI 别名（Android 独有）
-  - 新增 `cost` 字段 - 人均消费
-  - 新增 `photos` 字段 - 图片列表（两端都支持）
+  - iOS: 使用 `AMapBusinessData` 对象获取所有扩展字段（Since 9.4.0）
+  - **两端功能完全对等！** 均支持以下字段：
+    - `tel` - 电话号码
+    - `tag` - 特色内容标签
+    - `parkingType` - 停车场类型
+    - `alias` - POI 别名
+    - `cost` - 人均消费
+    - `rating` - 评分
+    - `openTime` - 营业时间（周）
+    - `openTimeToday` - 今日营业时间
+    - `photos` - 图片列表
 
 ### Changed
 - **TypeScript 类型定义增强**
-  - `AMapPoiExtensionType` 新增 `openTimeToday` 字段
+  - `AMapPoiExtensionType` 新增 `openTimeToday`、`cost` 字段
   - `AMapPOISearchListItem` 新增 `tel`、`tag`、`parkingType`、`alias` 字段
-  - 所有扩展字段均为可选类型（`?`）
+  - 所有扩展字段均为可选类型（`?`），保持跨平台兼容性
 
 ### Fixed
 - 修复 Android 端扩展信息始终为空的问题（需要设置 ShowFields）
 - 修复 Business 对象字段未正确获取的问题
 
 ### Technical Details
-- Android SDK v9.7.0 完全支持
-  - 使用 `PoiItemV2.getBusiness()` 获取扩展信息
+- **Android SDK v9.7.0**
+  - 使用 `PoiItemV2.getBusiness()` 获取 `Business` 对象
   - 使用 `query.setShowFields(new PoiSearchV2.ShowFields(PoiSearchV2.ShowFields.ALL))` 请求完整数据
-- iOS SDK 已有完整支持（无需修改）
+  - Business 类包含所有扩展字段
+- **iOS SDK 9.4.0+**
+  - 使用 `AMapPOI.businessData` 获取 `AMapBusinessData` 对象
+  - AMapBusinessData 类包含所有扩展字段（与Android Business完全对应）
+  - 兜底机制：businessData → extensionInfo → 直接属性
+
+### Platform Support
+| 字段 | Android | iOS | 说明 |
+|------|---------|-----|------|
+| `tel` | ✅ | ✅ | 电话号码 |
+| `tag` | ✅ | ✅ | 特色内容标签 |
+| `parkingType` | ✅ | ✅ | 停车场类型 |
+| `alias` | ✅ | ✅ | POI 别名 |
+| `cost` | ✅ | ✅ | 人均消费 |
+| `rating` | ✅ | ✅ | 评分 |
+| `openTime` | ✅ | ✅ | 营业时间（周） |
+| `openTimeToday` | ✅ | ✅ | 今日营业时间 |
+| `photos` | ✅ | ✅ | 图片列表 |
+
+**所有扩展字段两端均完全支持！**
 
 ### Documentation
 - 新增 `API_VERIFICATION_REPORT_FINAL.md` - 完整的 API 验证报告
