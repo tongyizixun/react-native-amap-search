@@ -27,6 +27,42 @@
   if(data.count>0){
     resultList = [NSMutableArray arrayWithCapacity: data.count];
     [data enumerateObjectsUsingBlock:^(AMapPOI *obj, NSUInteger idx, BOOL *stop) {
+        // 构建商圈对象
+        NSMutableDictionary *business = [NSMutableDictionary dictionary];
+        if ([obj.businessArea isKindOfClass:[NSString class]] && obj.businessArea.length > 0) {
+          business[@"businessArea"] = obj.businessArea;
+          // iOS POI 对象中商圈可能没有中心点坐标，设置为 POI 位置
+          if (obj.location) {
+            business[@"location"] = [self geoPointFormatData:obj.location];
+          }
+        }
+
+        // 构建扩展信息对象
+        NSMutableDictionary *poiExtension = [NSMutableDictionary dictionary];
+        if ([obj.opentime isKindOfClass:[NSString class]] && obj.opentime.length > 0) {
+          poiExtension[@"openTime"] = obj.opentime;
+        }
+        if ([obj.rating isKindOfClass:[NSString class]] && obj.rating.length > 0) {
+          poiExtension[@"rating"] = obj.rating;
+        }
+        // iOS SDK 中可能没有 cost 字段，根据实际情况调整
+
+        // 处理照片列表
+        if (obj.images && obj.images.count > 0) {
+          NSMutableArray *photos = [NSMutableArray arrayWithCapacity:obj.images.count];
+          [obj.images enumerateObjectsUsingBlock:^(AMapImage *image, NSUInteger idx, BOOL *stop) {
+            NSMutableDictionary *photo = [NSMutableDictionary dictionary];
+            if (image.title) {
+              photo[@"title"] = image.title;
+            }
+            if (image.url) {
+              photo[@"url"] = image.url;
+            }
+            [photos addObject:photo];
+          }];
+          poiExtension[@"photos"] = photos;
+        }
+
         [resultList addObject:@{
                                 @"uid": obj.uid, // uid
                                 @"name": obj.name, // 名称
@@ -42,9 +78,10 @@
                                 @"cityCode":obj.citycode, //城市编码
                                 @"district":obj.district, //区域名称
                                 @"adCode":obj.adcode, // 区域编码
-                                @"businessArea": obj.businessArea // 商圈名称 
+                                @"business": business.count > 0 ? business : @{}, // 商圈对象，空字典而不是 null
+                                @"poiExtension": poiExtension.count > 0 ? poiExtension : @{} // 扩展信息对象，空字典而不是 null
                                 }];
-        
+
     }];
   }
   return resultList;

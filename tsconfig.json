@@ -2,7 +2,8 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "react-native-amap-search": ["./src/index"]
+      "react-native-amap-search": ["./src/index"],
+      "@unif/react-native-amap-search": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

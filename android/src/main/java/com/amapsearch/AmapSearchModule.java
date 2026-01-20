@@ -28,6 +28,8 @@ import java.util.List;
 import com.amap.api.services.core.AMapException;
 import com.amap.api.services.core.PoiItemV2;
 import com.amap.api.services.core.ServiceSettings;
+import com.amap.api.services.poisearch.Photo;
+import com.amap.api.services.poisearch.Business;
 
 
 import com.amap.api.services.poisearch.PoiResultV2;
@@ -114,7 +116,94 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       item.putString("cityCode", poiItem.getCityCode());       // 城市编码
       item.putString("district", poiItem.getAdName());         // 区域名称
       item.putString("adCode", poiItem.getAdCode());           // 区域编码
-      item.putString("businessArea", poiItem.getBusiness().getBusinessArea());  // 获取商圈名称
+
+      // 获取商圈信息 - Business 对象包含所有扩展信息！
+      WritableMap business = Arguments.createMap();
+      WritableMap poiExtension = Arguments.createMap();
+
+      if (poiItem.getBusiness() != null) {
+        try {
+          Business businessObj = poiItem.getBusiness();
+
+          // 商圈名称
+          String businessArea = businessObj.getBusinessArea();
+          if (businessArea != null && !businessArea.isEmpty()) {
+            business.putString("businessArea", businessArea);
+          }
+
+          // 营业时间
+          String openTimeWeek = businessObj.getOpentimeWeek();
+          if (openTimeWeek != null && !openTimeWeek.isEmpty()) {
+            poiExtension.putString("openTime", openTimeWeek);
+          }
+
+          // 今日营业时间
+          String openTimeToday = businessObj.getOpentimeToday();
+          if (openTimeToday != null && !openTimeToday.isEmpty()) {
+            poiExtension.putString("openTimeToday", openTimeToday);
+          }
+
+          // 评分
+          String rating = businessObj.getmRating();
+          if (rating != null && !rating.isEmpty()) {
+            poiExtension.putString("rating", rating);
+          }
+
+          // 人均消费
+          String cost = businessObj.getCost();
+          if (cost != null && !cost.isEmpty()) {
+            poiExtension.putString("cost", cost);
+          }
+
+          // 电话号码
+          String tel = businessObj.getTel();
+          if (tel != null && !tel.isEmpty()) {
+            item.putString("tel", tel);
+          }
+
+          // 特色内容
+          String tag = businessObj.getTag();
+          if (tag != null && !tag.isEmpty()) {
+            item.putString("tag", tag);
+          }
+
+          // 停车场类型
+          String parkingType = businessObj.getParkingType();
+          if (parkingType != null && !parkingType.isEmpty()) {
+            item.putString("parkingType", parkingType);
+          }
+
+          // 别名
+          String alias = businessObj.getAlias();
+          if (alias != null && !alias.isEmpty()) {
+            item.putString("alias", alias);
+          }
+        } catch (Exception e) {
+          // 忽略异常，返回空对象
+        }
+      }
+      item.putMap("business", business);
+
+      // 添加图片列表到扩展信息
+      try {
+        if (poiItem.getPhotos() != null && poiItem.getPhotos().size() > 0) {
+          WritableArray photos = Arguments.createArray();
+          for (Photo photo : poiItem.getPhotos()) {
+            WritableMap photoMap = Arguments.createMap();
+            if (photo.getTitle() != null) {
+              photoMap.putString("title", photo.getTitle());
+            }
+            if (photo.getUrl() != null) {
+              photoMap.putString("url", photo.getUrl());
+            }
+            photos.pushMap(photoMap);
+          }
+          poiExtension.putArray("photos", photos);
+        }
+      } catch (Exception e) {
+        // 如果方法不存在或调用失败，忽略
+      }
+      item.putMap("poiExtension", poiExtension);
 
       return item;
   }
@@ -239,6 +328,10 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
     query.setPageSize(pageSize);   // 设置每页最多返回多少条
     query.setPageNum(currentPage); // 设置查询页码
     query.setCityLimit(cityLimit);  // 仅在通过关键字搜索时进行限制严格按照设置城市搜索
+
+    // 重要：设置返回所有扩展信息字段
+    query.setShowFields(new PoiSearchV2.ShowFields(PoiSearchV2.ShowFields.ALL));
+
     try {
       poiSearch = new PoiSearchV2(context, query);
       poiSearch.setOnPoiSearchListener(this);
@@ -260,6 +353,10 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
     query = new PoiSearchV2.Query(keyword, types, city);
     query.setPageSize(pageSize);   // 设置每页最多返回多少条
     query.setPageNum(currentPage); // 设置查询页码
+
+    // 设置返回所有扩展信息字段
+    query.setShowFields(new PoiSearchV2.ShowFields(PoiSearchV2.ShowFields.ALL));
+
     try {
       poiSearch = new PoiSearchV2(context, query);
       poiSearch.setOnPoiSearchListener(this);
@@ -285,6 +382,9 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
     query.setPageSize(pageSize);   // 设置每页最多返回多少条
     query.setPageNum(currentPage); // 设置查询页码
 
+    // 设置返回所有扩展信息字段
+    query.setShowFields(new PoiSearchV2.ShowFields(PoiSearchV2.ShowFields.ALL));
+
     List<LatLonPoint> polygonPoints = new ArrayList<LatLonPoint>();
     for(int i = 0; i < points.size(); i++ ){
       ReadableMap map = points.getMap(i);
@@ -309,6 +409,10 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
     this.jsPromise = promise;
     try {
       query = new PoiSearchV2.Query("", "");
+
+      // 设置返回所有扩展信息字段
+      query.setShowFields(new PoiSearchV2.ShowFields(PoiSearchV2.ShowFields.ALL));
+
       poiSearch = new PoiSearchV2(context, query);
       poiSearch.setOnPoiSearchListener(this);
       poiSearch.searchPOIIdAsyn(id);// 异步搜索
