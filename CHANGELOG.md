@@ -31,7 +31,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - 修复 Android 端扩展信息始终为空的问题（需要设置 ShowFields）
+- 修复 iOS 端扩展信息始终为空的问题（需要设置 showFieldsType）
 - 修复 Business 对象字段未正确获取的问题
+
+### Important Notes
+- **Android SDK**: 需要设置 `ShowFields.ALL` 来获取完整扩展信息
+- **iOS SDK**: 需要设置 `showFieldsType = AMapPOISearchShowFieldsTypeAll` 来获取完整扩展信息
+- 两端配置方式不同，但功能完全对等
 
 ### Technical Details
 - **Android SDK v9.7.0**
@@ -40,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Business 类包含所有扩展字段
 - **iOS SDK 9.4.0+**
   - 使用 `AMapPOI.businessData` 获取 `AMapBusinessData` 对象
+  - 使用 `request.showFieldsType = AMapPOISearchShowFieldsTypeAll` 请求完整数据（关键！）
   - AMapBusinessData 类包含所有扩展字段（与Android Business完全对应）
   - 兜底机制：businessData → extensionInfo → 直接属性
 

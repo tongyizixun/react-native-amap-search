@@ -79,8 +79,8 @@ RCT_EXPORT_METHOD(aMapPOIKeywordsSearch:(NSString *)keywords
   request.keywords            = keywords;
   request.city                = city;
   request.types               = types;
-  // request.requireExtension    = YES;
-      
+  request.showFieldsType      = AMapPOISearchShowFieldsTypeAll; // 请求所有扩展信息
+
   //    搜索SDK 3.2.0 中新增加的功能，只搜索本城市的POI。
   request.cityLimit           = cityLimit ? YES : NO;
   // request.requireSubPOIs      = YES;
@@ -113,7 +113,7 @@ RCT_EXPORT_METHOD(aMapPOIAroundSearch:(NSString *)keywords
   request.city                = city;
   request.radius              = radius;
   request.types               = types;
-  // request.requireExtension    = YES;
+  request.showFieldsType      = AMapPOISearchShowFieldsTypeAll; // 请求所有扩展信息
   request.location            = [AMapGeoPoint locationWithLatitude:[latitude doubleValue] longitude:[longitude doubleValue]];
       
   /* 按照距离排序. */
@@ -155,8 +155,8 @@ RCT_EXPORT_METHOD(aMapPOIPolygonSearch:(NSString *)keywords
   request.keywords            = keywords;
   request.polygon             = polygon;
   request.types               = types;
-//  request.requireExtension    = YES;
-  
+  request.showFieldsType      = AMapPOISearchShowFieldsTypeAll; // 请求所有扩展信息
+
   /* 按照距离排序. */
   request.sortrule            = 0;
   /* 设置分页页数 */
@@ -178,9 +178,9 @@ RCT_EXPORT_METHOD(aMapPOIIDSearch:(NSString *)uid
  
 
   AMapPOIIDSearchRequest *request = [[AMapPOIIDSearchRequest alloc] init];
-      
-  request.uid            = uid;
-  // request.requireExtension    = YES;
+
+  request.uid                 = uid;
+  request.showFieldsType      = AMapPOISearchShowFieldsTypeAll; // 请求所有扩展信息
   self->poiJsResolve = resolve;
   self->jsReject = reject;
   [self->search AMapPOIIDSearch:request];
