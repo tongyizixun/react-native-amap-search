@@ -13,194 +13,156 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-这是一个 React Native 库（`@unif/react-native-amap-search`），为 iOS 和 Android 提供高德地图搜索 SDK 的桥接。它支持 POI（兴趣点）搜索、地理编码、逆地理编码和行政区域查询。
+`@unif/react-native-amap-search` 是一个 React Native 库，桥接高德地图（AMap）搜索 SDK 到 iOS 与 Android。提供 POI 搜索、地理/逆地理编码、行政区划查询等能力。
+
+- Node 版本：见 `.nvmrc`（当前 16.18.1），`package.json` 要求 `>=16.0.0`
+- iOS 最低版本：11.0
+- Android 高德搜索 SDK：`com.amap.api:search:9.7.0`（POI 扩展信息需 9.4.0+）
+- iOS 高德搜索：CocoaPods `AMapSearch`（POI `businessData` 同样需 9.4.0+）
 
 ## 开发命令
 
-### 初始化设置
 ```bash
-yarn                    # 安装依赖
-yarn bootstrap          # 完整设置：安装依赖和 pods
-cd ios && pod install   # iOS: 更新 CocoaPods（修改原生代码后需要执行）
-```
+# 初始化（首次必跑）
+yarn bootstrap          # 等价于：yarn example && yarn install && yarn example pods
 
-### 开发调试
-```bash
-yarn example start      # 启动示例应用的 Metro bundler
-yarn example android    # 在 Android 上运行示例应用
-yarn example ios        # 在 iOS 上运行示例应用
-```
+# 调试示例应用（库源码通过 babel module-resolver 直链到 example，JS 改动免重建）
+yarn example start                      # 启动 Metro
+yarn example android                    # 运行 Android
+yarn example ios                        # 运行 iOS
 
-### 测试和质量检查
-```bash
-yarn test              # 运行 Jest 测试
-yarn test --watch      # 监听模式运行测试
-yarn test <文件名>      # 运行单个测试文件
-yarn typecheck         # TypeScript 类型检查
-yarn lint              # ESLint 代码检查
-yarn lint --fix        # 自动修复代码格式问题
-```
+# 修改原生代码后需要重建：
+cd ios && pod install                   # iOS 改了 .h/.m/.mm 后
 
-### 构建
-```bash
-yarn prepack                    # 构建库（运行 bob build）
-yarn build:android              # 构建 Android 示例 APK
-yarn build:ios                  # 构建 iOS 示例应用
-yarn release                    # 使用 release-it 发布新版本
-```
+# 质量检查
+yarn typecheck                          # tsc --noEmit
+yarn lint                               # ESLint（lefthook pre-commit 自动跑）
+yarn lint --fix
+yarn test                               # Jest（目前几乎为空，参考 src/__tests__/index.test.tsx）
+yarn test <pattern>                     # 单文件 / 名称匹配
 
-**发布流程：**
-- 使用 `yarn release` 自动化发布流程
-- release-it 会自动：
-  - 更新版本号
-  - 生成 changelog（基于 conventional commits）
-  - 创建 git tag (格式: `v${version}`)
-  - 提交到 npm registry
-  - 创建 GitHub release
-
-### 清理
-```bash
-yarn clean             # 清除 android/ios 的构建产物
+# 构建与发布
+yarn prepack                            # bob build → lib/{commonjs,module,typescript}
+yarn build:android                      # 构建示例 APK（debug, arm64-v8a）
+yarn build:ios                          # 构建示例 iOS Debug 包（模拟器）
+yarn release                            # release-it：自动 bump、changelog、tag、npm publish、GitHub release
+yarn clean                              # 清除 android/ios 构建产物
 ```
 
 ## 架构设计
 
-### 模块结构
-
-本库采用标准的 React Native 模块架构：
+### 桥接结构
 
 ```
-src/
-├── index.tsx              # 主导出文件
-├── api/index.tsx          # JavaScript API 层（导出所有公共函数）
-└── types/
-    ├── index.d.ts         # 类型导出
-    ├── common.d.ts        # 原生模块类型定义
-    └── poi.d.ts           # POI 搜索类型和结果类型
-
-ios/
-├── AmapSearch.h           # iOS 头文件
-├── AmapSearch.mm          # iOS 实现（Objective-C++）
-└── AMapUtils.h/m          # iOS 工具函数
-
-android/src/main/java/com/amapsearch/
-├── AmapSearchModule.java  # Android 原生模块实现
-└── AmapSearchPackage.java # Android 包注册
+src/api/index.tsx          ← JS 层：参数默认值、调用 NativeModules.AmapSearch.*、Proxy 链接错误提示
+src/types/{poi,common,index}.d.ts   ← 入参/出参 TypeScript 类型
+ios/AmapSearch.{h,mm}      ← iOS RCT 模块（Objective-C++）
+ios/AMapUtils.{h,m}        ← iOS 数据格式转换层（NSDictionary 化）
+android/src/main/java/com/amapsearch/AmapSearchModule.java   ← Android 模块 + 内联格式转换
+android/src/main/java/com/amapsearch/AmapSearchPackage.java  ← ReactPackage 注册
 ```
 
-### 桥接模式
+JS 调 `NativeModules.AmapSearch.<method>(...)`，原生侧通过 `RCT_EXPORT_METHOD`（iOS）/ `@ReactMethod`（Android）暴露方法，全部返回 Promise。
 
-本库使用 React Native 的 `NativeModules` 桥接：
-- **JavaScript 层**（`src/api/index.tsx`）：提供用户友好的异步函数和 TypeScript 类型
-- **原生层**（iOS/Android）：实现实际的高德地图 SDK 调用
-- **类型安全**：`src/types/` 中有完整的 TypeScript 类型定义
+### ⚠️ 原生回调单例模式（重要陷阱）
 
-所有导出的函数都是异步的并返回 Promise。原生模块处理平台特定的高德地图 SDK 调用。
+**iOS 与 Android 的实现都把 JS Promise resolver/rejecter 存成模块的实例变量，并不维护请求队列。**
 
-### 核心 API
+- iOS：`poiJsResolve` / `GeocodeJsResolve` / `districtJsResolve` / `jsReject` 是 `AmapSearch.mm` 的实例变量
+- Android：`this.jsPromise` 是 `AmapSearchModule` 的字段
+- 高德 SDK 通过 `AMapSearchDelegate` / `OnPoiSearchListener` 等回调接口返回结果，回调里直接 resolve 这些字段
 
-本库提供 10 个主要搜索功能：
+**含义**：同一时间只能有一个搜索请求在飞。并发调用会让前一个 Promise 永远 pending（callback 被覆盖）。在 JS 侧需要串行（`await` 链），或在原生侧引入 request id / 队列再支持并发。
 
-1. **init()** - 使用 API key 初始化 SDK
-2. **aMapPOIKeywordsSearch()** - 关键字搜索
-3. **aMapPOIAroundSearch()** - 周边搜索
-4. **aMapPOIPolygonSearch()** - 多边形范围搜索
-5. **aMapRoutePOISearch()** - 沿途搜索
-6. **aMapPOIInputTipsSearch()** - 搜索提示
-7. **aMapPOIIDSearch()** - 根据 POI ID 搜索
-8. **AMapReGeocodeSearch()** - 逆地理编码（坐标 → 地址）
-9. **AMapGeocodeSearch()** - 地理编码（地址 → 坐标）
-10. **AMapDistrictSearch()** - 行政区域搜索
+### 数据格式转换层
 
-## 重要开发说明
+原生 SDK 返回的对象需转换为 React Native 可序列化结构：
+
+- iOS：集中在 `ios/AMapUtils.m`，方法如 `poiSearchResponseFormatData:`、`regeocodeFormatData:`、`districtFormatData:`
+- Android：写在 `AmapSearchModule.java` 内部，方法如 `formatDataPoiV2`、`formatDataLatLonPoint`、`districtFormatData`、`formatDataStreetNumber`
+
+**新增/修改一个 POI 字段需要同步改三处**：iOS 转换函数 + Android 转换函数 + `src/types/poi.d.ts`。
+
+### POI 数据结构（v0.4.0 BREAKING CHANGE）
+
+POI 搜索返回结构已重组（与 SDK 9.4.0+ 的 `Business` / `businessData` 对齐）：
+
+- 顶层：基础字段（`uid`、`name`、`type`、`typeCode`、`latLonPoint`、地址、行政区划等）
+- `business`：所有商圈/营业类字段（`businessArea`、`openTime`、`openTimeToday`、`rating`、`cost`、`tel`、`tag`、`parkingType`、`alias`，iOS 多一个 `location`）
+- `poiExtension`：仅包含 `photos: [{title, url}]`
+
+详见类型定义 `src/types/poi.d.ts` 中 `AMapPOISearchListItem`、`AMapBusinessType`、`AMapPoiExtensionType`。
+
+iOS 实现里 `businessData`（9.4.0+）走主路径，旧版属性 / `extensionInfo` 是兜底（`ios/AMapUtils.m`）。Android 在 query 构造时设置 `setShowFields(ShowFields.ALL)`、iOS 在 request 上设置 `showFieldsType = AMapPOISearchShowFieldsTypeAll` 才能拿到完整字段；这是一个常见踩点。
+
+### 公共 API
+
+JS 层共暴露 1 个初始化 + 9 个搜索方法，全部位于 `src/api/index.tsx`：
+
+| JS 函数 | 原生方法 | 说明 |
+|--------|----------|------|
+| `init({ios, android})` | `initSDK(key)` | 初始化 SDK + 隐私授权 |
+| `aMapPOIKeywordsSearch` | `aMapPOIKeywordsSearch` | 关键字 POI 搜索 |
+| `aMapPOIAroundSearch` | `aMapPOIAroundSearch` | 周边 POI 搜索 |
+| `aMapPOIPolygonSearch` | `aMapPOIPolygonSearch` | 多边形 POI 搜索 |
+| `aMapRoutePOISearch` | `aMapRoutePOISearch` | 沿途 POI 搜索 |
+| `aMapPOIInputTipsSearch` | `aMapPOIInputTipsSearch` | 输入提示 |
+| `aMapPOIIDSearch` | `aMapPOIIDSearch` | 按 POI ID 查询 |
+| `AMapReGeocodeSearch` | `AMapReGeocodeSearch` | 逆地理编码 |
+| `AMapGeocodeSearch` | `AMapGeocodeSearch` | 地理编码 |
+| `AMapDistrictSearch` | `aMapDistrictSearch` | 行政区划 |
+
+**真实调用样例见 `example/src/App.tsx`**（最权威的用法参考，比 README 详细）。
+
+### 隐私合规
+
+`initSDK` 在两端都自动调用了高德 SDK 的隐私接口（iOS `AMapSearchAPI updatePrivacyShow/Agree`、Android `ServiceSettings.updatePrivacyShow/Agree`）。这是 2023 年起中国应用商店的合规要求，集成方无需再调用一次。
+
+### 新架构（Fabric / TurboModules）
+
+两端都有条件编译开关，但默认仍在旧架构上：
+
+- iOS：`AmapSearch.h` 使用 `#ifdef RCT_NEW_ARCH_ENABLED` 选择 `NativeAmapSearchSpec` 或 `RCTBridgeModule`
+- Android：`android/build.gradle` 检查 `newArchEnabled`，开启后会启用 `com.facebook.react` 插件
+
+修改原生模块签名时需要同步考虑这两条路径（旧架构是测试主路径）。
 
 ### API Key 配置
 
-本库支持三种方式配置高德地图 API key：
+支持三种方式（优先级：JS init > 原生预置）：
 
-1. **原生 iOS**（`ios/AppDelegate.m`）：
-   ```objc
-   #import <AMapFoundationKit/AMapFoundationKit.h>
-   [AMapServices sharedServices].apiKey = @"your-key";
-   ```
+1. iOS `AppDelegate.m`：`[AMapServices sharedServices].apiKey = @"...";`（先 `#import <AMapFoundationKit/AMapFoundationKit.h>`）
+2. Android `AndroidManifest.xml`：`<meta-data android:name="com.amap.api.v2.apikey" android:value="..." />`
+3. JS `init({ios, android})`：会覆盖原生预置
 
-2. **原生 Android**（`android/app/src/main/AndroidManifest.xml`）：
-   ```xml
-   <meta-data android:name="com.amap.api.v2.apikey" android:value="your-key" />
-   ```
+## 原生模块开发流程
 
-3. **JavaScript**（会覆盖原生配置）：
-   ```js
-   init({ios: 'ios-key', android: 'android-key'});
-   ```
+- iOS：用 Xcode 打开 `example/ios/AmapSearchExample.xcworkspace`，在 `Pods > Development Pods > react-native-amap-search` 下找源文件；改了 `.h/.m/.mm` 后跑 `cd ios && pod install` 并重建
+- Android：用 Android Studio 打开 `example/android`，在 `react-native-amap-search` 模块下找源文件；改了 Java 后重建即可
+- 调试链路：库源码通过 `example/babel.config.js` 的 `module-resolver` 直接指向 `src/`，JS 改动 Metro 热更新即可
 
-### 平台特定代码
+## 构建系统
 
-- iOS 使用 Objective-C++（`.mm` 扩展名）实现原生模块
-- Android 使用高德地图搜索 SDK v9（基于 `PoiSearchV2`、`PoiItemV2` 等导入）
-- JavaScript 层使用 `Platform.select()` 处理平台差异
+- `react-native-builder-bob` 构建 CommonJS / ES Module / TypeScript 三个目标，配置在 `package.json` 的 `react-native-builder-bob` 字段
+- TS 构建走 `tsconfig.build.json`
+- `release-it`（angular preset）从 conventional commits 自动生成 changelog、打 tag（`v${version}`）、发 npm + GitHub release
 
-### 原生模块开发
+## 提交规范
 
-编辑原生代码时：
-- **iOS**：使用 Xcode 打开 `example/ios/AmapSearchExample.xcworkspace`
-  - 在 `Pods > Development Pods > react-native-amap-search` 下查找源文件
-  - 修改后需要重新运行 `cd ios && pod install`
-- **Android**：使用 Android Studio 打开 `example/android`
-  - 在 `react-native-amap-search` 模块下查找源文件
+约定式提交（commitlint 通过 lefthook pre-commit / commit-msg 强制）：`feat` / `fix` / `refactor` / `docs` / `test` / `chore`。
 
-修改原生代码后需要重新构建示例应用（JavaScript 修改支持热重载）。
-
-**示例应用开发流程：**
-1. 在库的根目录运行 `yarn bootstrap` 进行初始化设置
-2. 修改 `src/` 下的 TypeScript 代码或 `ios/`、`android/` 下的原生代码
-3. 运行 `yarn example start` 启动 Metro bundler
-4. 在另一个终端运行 `yarn example android` 或 `yarn example ios` 启动应用
-5. 示例应用通过 `babel-plugin-module-resolver` 直接链接到库的 `src/` 目录，无需构建即可测试
-
-### 构建系统
-
-- 使用 `react-native-builder-bob` 构建 CommonJS、ES Module 和 TypeScript 输出
-- 构建配置在 `package.json` 的 `react-native-builder-bob` 字段中
-- TypeScript 构建使用 `tsconfig.build.json`
-
-### 提交规范
-
-本项目使用约定式提交（通过 lefthook 的 pre-commit hooks 强制执行）：
-- `feat:` - 新功能
-- `fix:` - Bug 修复
-- `refactor:` - 代码重构
-- `docs:` - 文档变更
-- `test:` - 测试添加/更新
-- `chore:` - 工具/构建变更
-
-Git hooks 配置：
-- 使用 `@evilmartians/lefthook` 管理 Git hooks
-- commit 前会自动运行 commitlint 检查提交信息格式
-- 确保提交信息符合约定式提交规范
-
-### 代码风格
-
-- 使用 ESLint + Prettier（配置在 `package.json` 中）
-- 单引号、2 空格缩进、ES5 尾逗号
-- 通过 pre-commit hooks 强制执行代码检查
+代码风格：ESLint + Prettier（单引号、2 空格、ES5 尾逗号），配置在 `package.json` 中。
 
 ## 测试策略
 
-- 单元测试使用 Jest 和 React Native preset
-- 测试文件位于 `src/__tests__/`
-- 模块路径忽略：`example/node_modules` 和 `lib/`
-- 使用 `yarn test` 运行测试
+- Jest 单测目前是占位（`src/__tests__/index.test.tsx` 只有 `it.todo`）；新增逻辑时再补
+- 真实集成测试 = 跑示例应用并使用 `example/src/App.tsx` 中的按钮触发各搜索
 
-## 常见模式
+## 参考资源
 
-### 错误处理
+仓库内文档（涉及 POI 数据结构 / SDK 字段时优先查阅）：
 
-本库使用 Proxy 在原生模块不可用时提供清晰的链接错误提示（参见 `src/api/index.tsx:22-31`）。
-
-### 类型安全
-
-所有搜索函数都接受类型化的参数并返回类型化的结果。类型定义区分了：
-- 必填字段与可选字段（例如 `AMapLatLonMustType` vs `AMapLatLonType`）
-- 不同的搜索结果类型（POI、地理编码、行政区域）
-- 平台特定枚举（例如 `AMapReGeocodeSearchLatLonType`）
+- `CHANGELOG.md` — v0.4.0 BREAKING 改动详情、字段映射
+- `API_VERIFICATION_REPORT_FINAL.md` — 高德 SDK 各字段的可用性 / 版本要求验证
+- `POI_TESTING_GUIDE.md` — POI 扩展信息测试建议（哪些 POI 类型有完整数据）
+- `example/src/App.tsx` — 各 API 的真实调用示例
