@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-04-29
+
+### Fixed
+- **iOS 编译失败修复**：0.4.0 在新版 AMapSearch（9.4.0+）下 fallback 分支编译不通过
+  - 移除 `AMapPOI` 顶层 `opentime` / `rating` 引用——这两个属性自 AMapSearch 9.4.0 起已迁至 `AMapBusinessData`，新 SDK 上已无定义
+  - `AMapPOIExtension.rating` / `.cost` 是 `CGFloat`（assign），不是 NSString；将原有 `isKindOfClass:[NSString class]` 检查改为数值判断 + `@()` 装箱
+- **podspec 钉最低 SDK 版本**：`AMapSearch >= 9.4.0`，避免装到老 SDK 时 `businessData` 分支拿不到数据
+
 ### Added
 - **完整的 POI 扩展信息支持** 🎉
   - Android: 使用 `Business` 对象获取所有扩展字段

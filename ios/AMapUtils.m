@@ -82,16 +82,13 @@
             business[@"location"] = [self geoPointFormatData:obj.location];
           }
         } else {
-          // 兜底：使用旧版属性
+          // businessData 不存在时（小概率，多见于老数据 / 老 SDK）从 AMapPOI 顶层
+          // 与 extensionInfo 兜底取业务字段
           if ([obj.businessArea isKindOfClass:[NSString class]] && obj.businessArea.length > 0) {
             business[@"businessArea"] = obj.businessArea;
           }
-          if ([obj.opentime isKindOfClass:[NSString class]] && obj.opentime.length > 0) {
-            business[@"openTime"] = obj.opentime;
-          }
-          if ([obj.rating isKindOfClass:[NSString class]] && obj.rating.length > 0) {
-            business[@"rating"] = obj.rating;
-          }
+          // 注意：AMapSearch 9.4.0 起 AMapPOI 顶层已无 opentime / rating / cost，
+          // 这些字段统一迁到 businessData 与 extensionInfo；兜底走下方 extensionInfo
           if ([obj.tel isKindOfClass:[NSString class]] && obj.tel.length > 0) {
             business[@"tel"] = obj.tel;
           }
@@ -107,11 +104,12 @@
             if (!business[@"openTime"] && [obj.extensionInfo.openTime isKindOfClass:[NSString class]] && obj.extensionInfo.openTime.length > 0) {
               business[@"openTime"] = obj.extensionInfo.openTime;
             }
-            if (!business[@"rating"] && [obj.extensionInfo.rating isKindOfClass:[NSString class]] && obj.extensionInfo.rating.length > 0) {
-              business[@"rating"] = obj.extensionInfo.rating;
+            // AMapPOIExtension 中 rating / cost 是 CGFloat（assign），不是 NSString
+            if (!business[@"rating"] && obj.extensionInfo.rating > 0) {
+              business[@"rating"] = @(obj.extensionInfo.rating);
             }
-            if ([obj.extensionInfo.cost isKindOfClass:[NSString class]] && obj.extensionInfo.cost.length > 0) {
-              business[@"cost"] = obj.extensionInfo.cost;
+            if (obj.extensionInfo.cost > 0) {
+              business[@"cost"] = @(obj.extensionInfo.cost);
             }
           }
         }

@@ -18,7 +18,9 @@ Pod::Spec.new do |s|
 
 
   # 高德搜索服务
-  s.dependency 'AMapSearch'
+  # 9.4.0 起新增 AMapBusinessData，业务字段（rating/cost/opentime）从 AMapPOI 顶层迁入；
+  # 此处钉一个最低版本，避免装到老 SDK 时 businessData 分支拿不到数据
+  s.dependency 'AMapSearch', '>= 9.4.0'
   
   # Use install_modules_dependencies helper to install the dependencies if React Native version >=0.71.0.
   # See https://github.com/facebook/react-native/blob/febf6b7f33fdb4904669f99d795eba4c0f95d7bf/scripts/cocoapods/new_architecture.rb#L79.
