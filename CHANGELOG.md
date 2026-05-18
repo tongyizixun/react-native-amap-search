@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-05-18
+
+### Fixed
+- **同步 0.2.x 侧分支上丢失的运行时防护**（0.2.3 → 0.2.19 那条分支上加过的 try-catch / nil-guard 一直没合并到主线 0.4.x，本次补回）。
+
+#### Android (`AmapSearchModule.java`)
+- `onPoiSearched` / `onPoiItemSearched` / `onGetInputtips` / `onRoutePoiSearched` 四个回调恢复 `result / poiItem / tipList / poiItems` 的 null 防护，避免 SDK 偶发空响应时 NPE 把 Promise 卡死。
+- `aMapPOIKeywordsSearch` / `aMapPOIAroundSearch` / `aMapPOIPolygonSearch` 把 `query.setShowFields(ShowFields.ALL)` 调用挪到 try 块内，避免 AMap SDK 版本不匹配时崩在 catch 之外。
+- 8 处 `catch (AMapException e)` 收紧为 `catch (Throwable e)`，覆盖 `RuntimeException` / `NoClassDefFoundError` 等运行时异常；Business / Photos 内层的 `catch (Exception e)` 同步改 `Throwable`。
+- `formatDataLatLonPoint` / `formatDataStreetNumber` 加入 null guard，新 SDK 返回 null 子对象时不再 NPE。
+
+#### iOS (`AmapSearch.mm` / `AMapUtils.m`)
+- `onPOISearchDone` 恢复 `response.pois.count == 0` 的空结果分支，返回空 list 而非依赖 formatter 兜底。
+- `onReGeocodeSearchDone` 恢复 `response.regeocode != nil` 防护，nil 时返回 `@{}`。
+- `AMapUtils.m` 中 8 个 format 方法（`poiFormatData` / `aoiFormatData` / `businessFormatData` / `roadsFormatData` / `roadsInterFormatData` / `regeocodeFormatData` 的 streetNumber 段 / `geocodeFormatData` / `districtFormatData`）外层加 `@try / @catch (NSException *exception)`，并在 `enumerateObjectsUsingBlock` 中加 `if (obj)` 过滤。
+- `poiFormatData` 额外在单条 POI 构造外加内层 `@try / @catch`，单条解析失败不影响整页其他 POI。
+
 ## [0.4.1] - 2026-04-29
 
 ### Fixed

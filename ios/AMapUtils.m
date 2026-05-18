@@ -24,9 +24,12 @@
 - (NSArray<AMapPOI *> *)poiFormatData:(NSArray<AMapPOI *> *)data
 {
   NSMutableArray *resultList = [NSMutableArray arrayWithCapacity:0];
+  @try {
   if(data.count>0){
     resultList = [NSMutableArray arrayWithCapacity: data.count];
     [data enumerateObjectsUsingBlock:^(AMapPOI *obj, NSUInteger idx, BOOL *stop) {
+        if (!obj) { return; }
+        @try {
         // 构建 business 对象 - 所有 businessData 字段都放在这里
         NSMutableDictionary *business = [NSMutableDictionary dictionary];
 
@@ -152,9 +155,11 @@
         } mutableCopy];
 
         [resultList addObject:poiData];
+        } @catch (NSException *exception) {}
 
     }];
   }
+  } @catch (NSException *exception) {}
   return resultList;
 }
 
@@ -162,18 +167,22 @@
 - (NSArray<AMapAOI *> *)aoiFormatData:(NSArray<AMapAOI *> *)data
 {
     NSMutableArray *resultList = [NSMutableArray arrayWithCapacity:data.count];
-    if (data.count > 0)
-    {
-        [data enumerateObjectsUsingBlock:^(AMapAOI *obj, NSUInteger idx, BOOL *stop) {
-          [resultList addObject:@{
-            @"uid": obj.uid, // uid
-            @"name": obj.name, // 名称
-            @"adCode": obj.adcode, // 所在区域编码
-            @"latLonPoint": [self geoPointFormatData:obj.location], // 中心点经纬度
-            @"area": @(obj.area) // 面积，单位平方米
+    @try {
+      if (data.count > 0)
+      {
+          [data enumerateObjectsUsingBlock:^(AMapAOI *obj, NSUInteger idx, BOOL *stop) {
+            if (obj) {
+              [resultList addObject:@{
+                @"uid": obj.uid, // uid
+                @"name": obj.name, // 名称
+                @"adCode": obj.adcode, // 所在区域编码
+                @"latLonPoint": [self geoPointFormatData:obj.location], // 中心点经纬度
+                @"area": @(obj.area) // 面积，单位平方米
+              }];
+            }
           }];
-        }];
       }
+    } @catch (NSException *exception) {}
     return resultList;
 }
 
@@ -182,15 +191,18 @@
 - (NSArray<AMapBusinessArea *> *)businessFormatData:(NSArray<AMapBusinessArea *> *)data
 {
     NSMutableArray *resultList = [NSMutableArray arrayWithCapacity:data.count];
-    if(data.count > 0){
-      [data enumerateObjectsUsingBlock:^(AMapBusinessArea *obj, NSUInteger idx, BOOL *stop){
-        [resultList addObject:@{
-          @"name": obj.name,
-          @"latLonPoint": [self geoPointFormatData:obj.location]
+    @try {
+      if(data.count > 0){
+        [data enumerateObjectsUsingBlock:^(AMapBusinessArea *obj, NSUInteger idx, BOOL *stop){
+          if (obj) {
+            [resultList addObject:@{
+              @"name": obj.name,
+              @"latLonPoint": [self geoPointFormatData:obj.location]
+            }];
+          }
         }];
-      }];
-    }
-  
+      }
+    } @catch (NSException *exception) {}
     return resultList;
 }
 
@@ -198,18 +210,21 @@
 - (NSArray<AMapRoad *> *)roadsFormatData:(NSArray<AMapRoad *> *)data
 {
   NSMutableArray *resultList = [NSMutableArray arrayWithCapacity:data.count];
-  if(data.count > 0){
-    [data enumerateObjectsUsingBlock:^(AMapRoad *obj, NSUInteger idx, BOOL *stop){
-      [resultList addObject:@{
-        @"uid": obj.uid,
-        @"name": obj.name,
-        @"distance": @(obj.distance),
-        @"direction": obj.direction,
-        @"latLonPoint":  [self geoPointFormatData: obj.location]
+  @try {
+    if(data.count > 0){
+      [data enumerateObjectsUsingBlock:^(AMapRoad *obj, NSUInteger idx, BOOL *stop){
+        if (obj) {
+          [resultList addObject:@{
+            @"uid": obj.uid,
+            @"name": obj.name,
+            @"distance": @(obj.distance),
+            @"direction": obj.direction,
+            @"latLonPoint":  [self geoPointFormatData: obj.location]
+          }];
+        }
       }];
-    }];
-  }
-
+    }
+  } @catch (NSException *exception) {}
   return resultList;
 }
 
@@ -217,27 +232,30 @@
 - (NSArray<AMapRoadInter *> *)roadsInterFormatData:(NSArray<AMapRoadInter *> *)data
 {
   NSMutableArray *resultList = [NSMutableArray arrayWithCapacity:data.count];
-  if(data.count > 0){
-    [data enumerateObjectsUsingBlock:^(AMapRoadInter *obj, NSUInteger idx, BOOL *stop){
-      [resultList addObject:@{
-        ///距离（单位：米）
-        @"distance": @(obj.distance),
-        ///方向
-        @"direction": obj.direction,
-        ///经纬度
-        @"latLonPoint": [self geoPointFormatData: obj.location],
-        ///第一条道路ID
-        @"firstId": obj.firstId,
-        ///第一条道路名称
-        @"firstName": obj.firstName,
-        ///第二条道路ID
-        @"secondId": obj.secondId,
-        ///第二条道路名称
-        @"secondName": obj.secondName
+  @try {
+    if(data.count > 0){
+      [data enumerateObjectsUsingBlock:^(AMapRoadInter *obj, NSUInteger idx, BOOL *stop){
+        if (obj) {
+          [resultList addObject:@{
+            ///距离（单位：米）
+            @"distance": @(obj.distance),
+            ///方向
+            @"direction": obj.direction,
+            ///经纬度
+            @"latLonPoint": [self geoPointFormatData: obj.location],
+            ///第一条道路ID
+            @"firstId": obj.firstId,
+            ///第一条道路名称
+            @"firstName": obj.firstName,
+            ///第二条道路ID
+            @"secondId": obj.secondId,
+            ///第二条道路名称
+            @"secondName": obj.secondName
+          }];
+        }
       }];
-    }];
-  }
-
+    }
+  } @catch (NSException *exception) {}
   return resultList;
 }
 
@@ -254,16 +272,18 @@
 - (NSDictionary *)regeocodeFormatData:(AMapReGeocodeSearchResponse *)response
 {
     NSMutableDictionary *streetNumber = [NSMutableDictionary dictionary];
-    if([response.regeocode.addressComponent.streetNumber.street isKindOfClass:[NSString class]]){
-      NSDictionary *streetNumberData = @{
-        @"street": response.regeocode.addressComponent.streetNumber.street,
-        @"number": response.regeocode.addressComponent.streetNumber.number,
-        @"latLonPoint": [self geoPointFormatData: response.regeocode.addressComponent.streetNumber.location],
-        @"distance": @(response.regeocode.addressComponent.streetNumber.distance),
-        @"direction": response.regeocode.addressComponent.streetNumber.direction,
-      };
-      [streetNumber setDictionary:streetNumberData];
-    }
+    @try {
+      if([response.regeocode.addressComponent.streetNumber.street isKindOfClass:[NSString class]]){
+        NSDictionary *streetNumberData = @{
+          @"street": response.regeocode.addressComponent.streetNumber.street,
+          @"number": response.regeocode.addressComponent.streetNumber.number,
+          @"latLonPoint": [self geoPointFormatData: response.regeocode.addressComponent.streetNumber.location],
+          @"distance": @(response.regeocode.addressComponent.streetNumber.distance),
+          @"direction": response.regeocode.addressComponent.streetNumber.direction,
+        };
+        [streetNumber setDictionary:streetNumberData];
+      }
+    } @catch (NSException *exception) {}
     
     NSDictionary *data = @{
         @"address": response.regeocode.formattedAddress,
@@ -292,37 +312,41 @@
 - (NSArray<AMapPOI *> *)geocodeFormatData:(AMapGeocodeSearchResponse *)response
 {
   NSMutableArray *resultList = [NSMutableArray arrayWithCapacity:response.geocodes.count];
-  if (response.geocodes.count > 0)
-  {
-    [response.geocodes enumerateObjectsUsingBlock:^(AMapGeocode *obj, NSUInteger idx, BOOL *stop){
-      [resultList addObject:@{
-        ///格式化地址
-        @"formatAddress": obj.formattedAddress,
-        ///省份
-        @"province": obj.province,
-        ///城市名称
-        @"city": obj.city,
-        ///区域名称
-        @"district": obj.district,
-        ///区域编码
-        @"adCode": obj.adcode,
-        ///乡镇街道
-        @"township": obj.township,
-        ///社区
-        @"neighborhood": obj.neighborhood,
-        ///楼
-        @"building": obj.building,
-        /// 坐标
-        @"latLonPoint": [self geoPointFormatData:obj.location], // 中心点经纬度
-        ///匹配的等级
-        @"level": obj.level,
-        ///国家-仅海外生效
-        @"country": obj.country,
-        ///国家简码-仅海外生效
-        @"postCode": obj.postcode,
+  @try {
+    if (response.geocodes.count > 0)
+    {
+      [response.geocodes enumerateObjectsUsingBlock:^(AMapGeocode *obj, NSUInteger idx, BOOL *stop){
+        if (obj) {
+          [resultList addObject:@{
+            ///格式化地址
+            @"formatAddress": obj.formattedAddress,
+            ///省份
+            @"province": obj.province,
+            ///城市名称
+            @"city": obj.city,
+            ///区域名称
+            @"district": obj.district,
+            ///区域编码
+            @"adCode": obj.adcode,
+            ///乡镇街道
+            @"township": obj.township,
+            ///社区
+            @"neighborhood": obj.neighborhood,
+            ///楼
+            @"building": obj.building,
+            /// 坐标
+            @"latLonPoint": [self geoPointFormatData:obj.location], // 中心点经纬度
+            ///匹配的等级
+            @"level": obj.level,
+            ///国家-仅海外生效
+            @"country": obj.country,
+            ///国家简码-仅海外生效
+            @"postCode": obj.postcode,
+          }];
+        }
       }];
-    }];
-  }
+    }
+  } @catch (NSException *exception) {}
   return  resultList;
 }
 
@@ -331,28 +355,32 @@
 - (NSArray<AMapDistrict *> *)districtFormatData:(NSArray<AMapDistrict *> *)districts
 {
   NSMutableArray *resultList = [NSMutableArray arrayWithCapacity: 0];
-  if (districts.count > 0)
-  {
-    resultList = [NSMutableArray arrayWithCapacity: districts.count];
-    [districts enumerateObjectsUsingBlock:^(AMapDistrict *obj, NSUInteger idx, BOOL *stop){
-      [resultList addObject:@{
-        ///区域编码
-        @"adCode": obj.adcode,
-        ///城市编码
-        @"cityCode": obj.citycode,
-        ///行政区名称
-        @"name": obj.name,
-        ///级别
-        @"level": obj.level,
-        ///城市中心点
-        @"center": [self geoPointFormatData:obj.center],
-        ///下级行政区域数组
-        @"districts": [self districtFormatData: obj.districts],
-        ///行政区边界坐标点, NSString 数组
-        @"polylines": obj.polylines ? obj.polylines : @[]
+  @try {
+    if (districts.count > 0)
+    {
+      resultList = [NSMutableArray arrayWithCapacity: districts.count];
+      [districts enumerateObjectsUsingBlock:^(AMapDistrict *obj, NSUInteger idx, BOOL *stop){
+        if (obj) {
+          [resultList addObject:@{
+            ///区域编码
+            @"adCode": obj.adcode,
+            ///城市编码
+            @"cityCode": obj.citycode,
+            ///行政区名称
+            @"name": obj.name,
+            ///级别
+            @"level": obj.level,
+            ///城市中心点
+            @"center": [self geoPointFormatData:obj.center],
+            ///下级行政区域数组
+            @"districts": [self districtFormatData: obj.districts],
+            ///行政区边界坐标点, NSString 数组
+            @"polylines": obj.polylines ? obj.polylines : @[]
+          }];
+        }
       }];
-    }];
-  }
+    }
+  } @catch (NSException *exception) {}
   return  resultList;
 }
 

@@ -96,8 +96,10 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
   //  经纬度数据转换
   public WritableMap formatDataLatLonPoint(LatLonPoint latlonPoint) {
     WritableMap item = Arguments.createMap();
-    item.putDouble("latitude", latlonPoint.getLatitude());
-    item.putDouble("longitude",latlonPoint.getLongitude());
+    if (latlonPoint != null) {
+      item.putDouble("latitude", latlonPoint.getLatitude());
+      item.putDouble("longitude", latlonPoint.getLongitude());
+    }
     return  item;
   }
 
@@ -178,8 +180,8 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
           if (alias != null && !alias.isEmpty()) {
             business.putString("alias", alias);
           }
-        } catch (Exception e) {
-          // 忽略异常，返回空对象
+        } catch (Throwable e) {
+          // 忽略异常（含 NoClassDefFoundError），返回空对象
         }
       }
       item.putMap("business", business);
@@ -200,8 +202,8 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
           }
           poiExtension.putArray("photos", photos);
         }
-      } catch (Exception e) {
-        // 如果方法不存在或调用失败，忽略
+      } catch (Throwable e) {
+        // 如果方法不存在或调用失败（含 NoClassDefFoundError），忽略
       }
       item.putMap("poiExtension", poiExtension);
 
@@ -305,11 +307,13 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
   // 门牌信息数据转换
   public WritableMap formatDataStreetNumber(StreetNumber streetNumber) {
     WritableMap item= Arguments.createMap();
-    item.putString("number", streetNumber.getNumber());
-    item.putString("street", streetNumber.getStreet());
-    item.putString("direction", streetNumber.getDirection());
-    item.putDouble("distance", streetNumber.getDistance());
-    item.putMap("latLonPoint", formatDataLatLonPoint(streetNumber.getLatLonPoint())); // 经纬度
+    if (streetNumber != null) {
+      item.putString("number", streetNumber.getNumber());
+      item.putString("street", streetNumber.getStreet());
+      item.putString("direction", streetNumber.getDirection());
+      item.putDouble("distance", streetNumber.getDistance());
+      item.putMap("latLonPoint", formatDataLatLonPoint(streetNumber.getLatLonPoint())); // 经纬度
+    }
     return item;
   }
 
@@ -329,14 +333,13 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
     query.setPageNum(currentPage); // 设置查询页码
     query.setCityLimit(cityLimit);  // 仅在通过关键字搜索时进行限制严格按照设置城市搜索
 
-    // 重要：设置返回所有扩展信息字段
-    query.setShowFields(new PoiSearchV2.ShowFields(PoiSearchV2.ShowFields.ALL));
-
     try {
+      // 重要：设置返回所有扩展信息字段
+      query.setShowFields(new PoiSearchV2.ShowFields(PoiSearchV2.ShowFields.ALL));
       poiSearch = new PoiSearchV2(context, query);
       poiSearch.setOnPoiSearchListener(this);
       poiSearch.searchPOIAsyn(); // 异步搜索
-    } catch (AMapException e) {
+    } catch (Throwable e) {
       e.printStackTrace();
     }
   }
@@ -354,16 +357,15 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
     query.setPageSize(pageSize);   // 设置每页最多返回多少条
     query.setPageNum(currentPage); // 设置查询页码
 
-    // 设置返回所有扩展信息字段
-    query.setShowFields(new PoiSearchV2.ShowFields(PoiSearchV2.ShowFields.ALL));
-
     try {
+      // 设置返回所有扩展信息字段
+      query.setShowFields(new PoiSearchV2.ShowFields(PoiSearchV2.ShowFields.ALL));
       poiSearch = new PoiSearchV2(context, query);
       poiSearch.setOnPoiSearchListener(this);
       //设置周边搜索的中心点以及半径
       poiSearch.setBound(new SearchBound(new LatLonPoint(latitude,longitude), radius, true));
       poiSearch.searchPOIAsyn();// 异步搜索
-    } catch (AMapException e) {
+    } catch (Throwable e) {
       e.printStackTrace();
     }
 
@@ -382,9 +384,6 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
     query.setPageSize(pageSize);   // 设置每页最多返回多少条
     query.setPageNum(currentPage); // 设置查询页码
 
-    // 设置返回所有扩展信息字段
-    query.setShowFields(new PoiSearchV2.ShowFields(PoiSearchV2.ShowFields.ALL));
-
     List<LatLonPoint> polygonPoints = new ArrayList<LatLonPoint>();
     for(int i = 0; i < points.size(); i++ ){
       ReadableMap map = points.getMap(i);
@@ -392,12 +391,14 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
     }
 
     try {
+      // 设置返回所有扩展信息字段
+      query.setShowFields(new PoiSearchV2.ShowFields(PoiSearchV2.ShowFields.ALL));
       poiSearch = new PoiSearchV2(context, query);
       poiSearch.setOnPoiSearchListener(this);
       //设置多边形区域
       poiSearch.setBound(new SearchBound(polygonPoints));
       poiSearch.searchPOIAsyn();// 异步搜索
-    } catch (AMapException e) {
+    } catch (Throwable e) {
       e.printStackTrace();
     }
 
@@ -416,7 +417,7 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       poiSearch = new PoiSearchV2(context, query);
       poiSearch.setOnPoiSearchListener(this);
       poiSearch.searchPOIIdAsyn(id);// 异步搜索
-    } catch (AMapException e) {
+    } catch (Throwable e) {
       e.printStackTrace();
     }
   }
@@ -484,7 +485,7 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       search = new RoutePOISearch(context, query);
       search.setPoiSearchListener(this);
       search.searchRoutePOIAsyn();
-    } catch (AMapException e) {
+    } catch (Throwable e) {
       e.printStackTrace();
     }
   }
@@ -503,7 +504,7 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       search.setQuery(query);
       search.setOnDistrictSearchListener(this);//绑定监听器
       search.searchDistrictAsyn();//开始搜索
-    } catch (AMapException e) {
+    } catch (Throwable e) {
       e.printStackTrace();
     }
   }
@@ -571,7 +572,7 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       query.setMode(mode);
       query.setPoiType(poiType);
       geocoderSearch.getFromLocationAsyn(query);
-    } catch (AMapException e) {
+    } catch (Throwable e) {
       e.printStackTrace();
     }
   }
@@ -586,7 +587,7 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       GeocodeQuery query = new GeocodeQuery(name, city);
       query.setCountry(country);
       geocoderSearch.getFromLocationNameAsyn(query);
-    } catch (AMapException e) {
+    } catch (Throwable e) {
       e.printStackTrace();
     }
 
@@ -677,8 +678,13 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       }
       if (rCode == AMapException.CODE_AMAP_SUCCESS) {
         WritableMap item = Arguments.createMap();
-        item.putInt("count", result.getCount());
-        item.putArray("list", formatDataPoisV2(result.getPois()));
+        if (result != null) {
+          item.putInt("count", result.getCount());
+          item.putArray("list", formatDataPoisV2(result.getPois()));
+        } else {
+          item.putInt("count", 0);
+          item.putArray("list", Arguments.createArray());
+        }
         this.jsPromise.resolve(item);
       } else {
         this.jsPromise.reject("onPoiSearched: ", String.valueOf(rCode));
@@ -694,9 +700,13 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       }
       if (rCode == AMapException.CODE_AMAP_SUCCESS) {
         WritableArray array = Arguments.createArray();
-        array.pushMap(formatDataPoiV2(poiItem));
         WritableMap item = Arguments.createMap();
-        item.putInt("count", 1);
+        if (poiItem != null) {
+          array.pushMap(formatDataPoiV2(poiItem));
+          item.putInt("count", 1);
+        } else {
+          item.putInt("count", 0);
+        }
         item.putArray("list", array);
         this.jsPromise.resolve(item);
       } else {
@@ -713,20 +723,24 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       }
       if (rCode == AMapException.CODE_AMAP_SUCCESS) {
         WritableArray array = Arguments.createArray();
-        for (int i = 0; i < tipList.size(); i++) {
-          Tip tip = tipList.get(i);
-          WritableMap item= Arguments.createMap();
-          item.putString("adCode", tip.getAdcode());
-          item.putString("district", tip.getDistrict());
-          item.putString("typeCode", tip.getTypeCode());
-          item.putString("name", tip.getName());
-          item.putString("uid", tip.getPoiID());
-          item.putString("address", tip.getAddress());
-          item.putMap("latLonPoint", formatDataLatLonPoint(tip.getPoint()));
-          array.pushMap(item);
-        }
         WritableMap resolveItem= Arguments.createMap();
-        resolveItem.putInt("count", tipList.size());
+        if (tipList != null) {
+          for (int i = 0; i < tipList.size(); i++) {
+            Tip tip = tipList.get(i);
+            WritableMap item= Arguments.createMap();
+            item.putString("adCode", tip.getAdcode());
+            item.putString("district", tip.getDistrict());
+            item.putString("typeCode", tip.getTypeCode());
+            item.putString("name", tip.getName());
+            item.putString("uid", tip.getPoiID());
+            item.putString("address", tip.getAddress());
+            item.putMap("latLonPoint", formatDataLatLonPoint(tip.getPoint()));
+            array.pushMap(item);
+          }
+          resolveItem.putInt("count", tipList.size());
+        } else {
+          resolveItem.putInt("count", 0);
+        }
         resolveItem.putArray("list", array);
         this.jsPromise.resolve(resolveItem);
       } else {
@@ -742,18 +756,26 @@ public class AmapSearchModule extends ReactContextBaseJavaModule implements OnPo
       }
       if (rCode == AMapException.CODE_AMAP_SUCCESS) {
         WritableArray array = Arguments.createArray();
-        List<RoutePOIItem> poiItems = result.getRoutePois();
-        for(int i = 0 ; i< poiItems.size(); i++){
-          WritableMap item = Arguments.createMap();
-          RoutePOIItem poiItem = poiItems.get(i);
-          item.putString("uid",poiItem.getID());
-          item.putString("name",poiItem.getTitle()); //名称
-          item.putMap("latLonPoint",formatDataLatLonPoint(poiItem.getPoint())); // 经纬度
-          item.putDouble("distance", poiItem.getDistance());  //距中心点的距离，单位米
-          array.pushMap(item);
-        }
         WritableMap resolveItem= Arguments.createMap();
-        resolveItem.putInt("count", poiItems.size());
+        if (result != null) {
+          List<RoutePOIItem> poiItems = result.getRoutePois();
+          if (poiItems != null && poiItems.size() > 0) {
+            for (int i = 0; i < poiItems.size(); i++) {
+              WritableMap item = Arguments.createMap();
+              RoutePOIItem poiItem = poiItems.get(i);
+              item.putString("uid", poiItem.getID());
+              item.putString("name", poiItem.getTitle()); //名称
+              item.putMap("latLonPoint", formatDataLatLonPoint(poiItem.getPoint())); // 经纬度
+              item.putDouble("distance", poiItem.getDistance());  //距中心点的距离，单位米
+              array.pushMap(item);
+            }
+            resolveItem.putInt("count", poiItems.size());
+          } else {
+            resolveItem.putInt("count", 0);
+          }
+        } else {
+          resolveItem.putInt("count", 0);
+        }
         resolveItem.putArray("list", array);
         this.jsPromise.resolve(resolveItem);
       } else {
